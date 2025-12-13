@@ -1,0 +1,7 @@
+masuk vscode terminal running composer install (jika blm install bisa check google dlu cara install nya)
+setelah sudah terinsal check file .env ganti dbname nya (terserah sesuain aja kak)
+jalankan php artisan migrate
+jika berhasil lanjutkan dengan menjalakan php artisan db:seed
+dan untuk memulai web nya bisa php artisan serve
+
+untuk xendit nya pake kaduy0700@gmail.com pass nya sma kayak gmail nya.
