@@ -23,7 +23,9 @@ class BookingController extends Controller
      */
     public function index()
     {
-        $bookings = Auth::user()->bookings()
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $bookings = $user->bookings()
             ->with(['service', 'therapist', 'payment'])
             ->orderBy('booking_date', 'desc')
             ->paginate(10);
@@ -69,8 +71,10 @@ class BookingController extends Controller
         }
 
         // Create booking
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $booking = Booking::create([
-            'user_id' => Auth::id(),
+            'user_id' => $user->id,
             'service_id' => $validated['service_id'],
             'therapist_id' => $validated['therapist_id'] ?? null,
             'booking_date' => $validated['booking_date'],
@@ -97,7 +101,9 @@ class BookingController extends Controller
     public function show(Booking $booking)
     {
         // Ensure user can only view their own bookings
-        if ($booking->user_id !== Auth::id()) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($booking->user_id !== $user->id) {
             abort(403, 'Unauthorized access');
         }
 
@@ -112,7 +118,9 @@ class BookingController extends Controller
     public function cancel(Booking $booking)
     {
         // Ensure user can only cancel their own bookings
-        if ($booking->user_id !== Auth::id()) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($booking->user_id !== $user->id) {
             abort(403, 'Unauthorized access');
         }
 

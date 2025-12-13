@@ -17,7 +17,9 @@ class ReviewController extends Controller
     public function store(Request $request, Booking $booking)
     {
         // Ensure user owns this booking
-        if ($booking->user_id !== Auth::id()) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($booking->user_id !== $user->id) {
             abort(403, 'Unauthorized access');
         }
 
@@ -40,8 +42,10 @@ class ReviewController extends Controller
             'comment' => 'nullable|string|max:1000',
         ]);
 
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         Review::create([
-            'user_id' => Auth::id(),
+            'user_id' => $user->id,
             'booking_id' => $booking->id,
             'service_id' => $booking->service_id,
             'rating' => $validated['rating'],
@@ -58,7 +62,9 @@ class ReviewController extends Controller
     public function update(Request $request, Review $review)
     {
         // Ensure user owns this review
-        if ($review->user_id !== Auth::id()) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($review->user_id !== $user->id) {
             abort(403, 'Unauthorized access');
         }
 
@@ -78,7 +84,9 @@ class ReviewController extends Controller
     public function destroy(Review $review)
     {
         // Ensure user owns this review
-        if ($review->user_id !== Auth::id()) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($review->user_id !== $user->id) {
             abort(403, 'Unauthorized access');
         }
 

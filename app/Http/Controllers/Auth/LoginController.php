@@ -32,14 +32,17 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            
             // Redirect admin to admin dashboard
-            if (Auth::user()->isAdmin()) {
+            if ($user->isAdmin()) {
                 return redirect()->intended(route('admin.dashboard'))
-                    ->with('success', 'Welcome back, ' . Auth::user()->name . '!');
+                    ->with('success', 'Welcome back, ' . $user->name . '!');
             }
 
             return redirect()->intended(route('home'))
-                ->with('success', 'Welcome back, ' . Auth::user()->name . '!');
+                ->with('success', 'Welcome back, ' . $user->name . '!');
         }
 
         throw ValidationException::withMessages([

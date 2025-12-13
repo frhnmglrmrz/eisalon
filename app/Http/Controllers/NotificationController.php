@@ -12,7 +12,9 @@ class NotificationController extends Controller
      */
     public function markAllAsRead()
     {
-        Auth::user()->unreadNotifications->markAsRead();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $user->unreadNotifications->markAsRead();
         return back();
     }
 
@@ -21,7 +23,9 @@ class NotificationController extends Controller
      */
     public function markAsRead($id)
     {
-        $notification = Auth::user()->notifications()->findOrFail($id);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $notification = $user->notifications()->findOrFail($id);
         $notification->markAsRead();
         
         // Redirect to the link in the notification data if exists
