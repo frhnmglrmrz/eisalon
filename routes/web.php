@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ReviewController;
@@ -15,7 +16,10 @@ use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 
 // Home
-Route::get('/', [ServiceController::class, 'index'])->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Services Listing
+Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
 
 // E-Catalog (Public)
 Route::get('catalog', [CatalogController::class, 'index'])->name('catalog.index');
