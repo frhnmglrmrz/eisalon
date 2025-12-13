@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Builder;
 
 class Booking extends Model
 {
@@ -25,48 +28,79 @@ class Booking extends Model
     ];
 
     // Relationships
-    public function user()
+    /**
+     * @return BelongsTo
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function service()
+    /**
+     * @return BelongsTo
+     */
+    public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
     }
 
-    public function therapist()
+    /**
+     * @return BelongsTo
+     */
+    public function therapist(): BelongsTo
     {
         return $this->belongsTo(Therapist::class);
     }
 
-    public function payment()
+    /**
+     * @return HasOne
+     */
+    public function payment(): HasOne
     {
         return $this->hasOne(Payment::class);
     }
 
-    public function review()
+    /**
+     * @return HasOne
+     */
+    public function review(): HasOne
     {
         return $this->hasOne(Review::class);
     }
 
     // Scopes
-    public function scopePending($query)
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopePending(Builder $query): Builder
     {
         return $query->where('status', 'pending');
     }
 
-    public function scopeConfirmed($query)
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeConfirmed(Builder $query): Builder
     {
         return $query->where('status', 'confirmed');
     }
 
-    public function scopeCompleted($query)
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeCompleted(Builder $query): Builder
     {
         return $query->where('status', 'completed');
     }
 
-    public function scopeUpcoming($query)
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeUpcoming(Builder $query): Builder
     {
         return $query->where('booking_date', '>', now())
                      ->whereIn('status', ['pending', 'confirmed']);
