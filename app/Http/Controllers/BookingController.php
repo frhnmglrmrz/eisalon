@@ -171,16 +171,16 @@ class BookingController extends Controller
 
         $service = Service::findOrFail($validated['service_id']);
         $date = $validated['date'];
-        
+
         // Business hours: 9 AM - 9 PM
         $startHour = 9;
         $endHour = 21;
-        
+
         $slots = [];
-        
+
         for ($hour = $startHour; $hour < $endHour; $hour++) {
             $timeSlot = $date . ' ' . str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00:00';
-            
+
             // Check if slot is available
             $isBooked = Booking::where('booking_date', $timeSlot)
                 ->whereIn('status', ['confirmed', 'in_progress'])
@@ -188,7 +188,7 @@ class BookingController extends Controller
                     return $query->where('therapist_id', $validated['therapist_id']);
                 })
                 ->exists();
-            
+
             if (!$isBooked) {
                 $slots[] = [
                     'time' => date('H:i', strtotime($timeSlot)),
