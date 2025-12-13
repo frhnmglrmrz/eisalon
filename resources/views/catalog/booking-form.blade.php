@@ -52,8 +52,22 @@
                 Isi formulir di bawah ini dan kami akan mengirimkan detail pemesanan Anda melalui WhatsApp.
             </p>
 
-            <form id="bookingForm" class="space-y-6">
+            <form action="{{ route('catalog.booking.store', $service) }}" method="POST" class="space-y-6">
                 @csrf
+                
+                <!-- Email (Optional) -->
+                <div>
+                    <label for="email" class="block text-gray-700 font-bold mb-2">
+                        <i class="fas fa-envelope mr-2"></i>Email (Opsional)
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none"
+                        placeholder="email@example.com"
+                    >
+                </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Nama -->
@@ -157,58 +171,20 @@
     </div>
 </div>
 
-<script>
-document.getElementById('bookingForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Get form values
-    const name = document.getElementById('name').value;
-    const phone = document.getElementById('phone').value;
-    const date = document.getElementById('date').value;
-    const time = document.getElementById('time').value;
-    const notes = document.getElementById('notes').value;
-    
-    // Format phone number (remove leading 0, add 62)
-    let formattedPhone = phone.replace(/^0/, '62').replace(/\D/g, '');
-    
-    // Format date
-    const dateObj = new Date(date);
-    const formattedDate = dateObj.toLocaleDateString('id-ID', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-    });
-    
-    // Create WhatsApp message
-    const message = `Halo, saya ingin memesan layanan:
+@if(session('success'))
+    <div class="fixed top-20 right-6 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 animate-fadeIn">
+        <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+    </div>
+@endif
 
-*Layanan:* {{ $service->name }}
-*Harga:* Rp {{ number_format($service->price, 0, ',', '.') }}
-*Durasi:* {{ $service->duration }} menit
-
-*Data Pemesanan:*
-Nama: ${name}
-Nomor WhatsApp: ${phone}
-Tanggal: ${formattedDate}
-Waktu: ${time}
-${notes ? `Catatan: ${notes}` : ''}
-
-Mohon konfirmasi ketersediaan untuk waktu tersebut. Terima kasih!`;
-    
-    // Encode message for URL
-    const encodedMessage = encodeURIComponent(message);
-    
-    // WhatsApp API URL
-    const whatsappNumber = '{{ config("services.whatsapp.phone_number", "6281234567890") }}';
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-    
-    // Open WhatsApp
-    window.open(whatsappUrl, '_blank');
-    
-    // Show success message
-    alert('Anda akan diarahkan ke WhatsApp. Pastikan nomor WhatsApp Anda sudah benar!');
-});
-</script>
+@if($errors->any())
+    <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
+        <ul class="list-disc list-inside">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 @endsection
 

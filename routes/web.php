@@ -20,6 +20,7 @@ Route::get('/', [ServiceController::class, 'index'])->name('home');
 // E-Catalog (Public)
 Route::get('catalog', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('catalog/booking/{service}', [CatalogController::class, 'showBookingForm'])->name('catalog.booking');
+Route::post('catalog/booking/{service}', [CatalogController::class, 'storeBooking'])->name('catalog.booking.store');
 
 // Database Check (for testing only)
 Route::get('/check-database', function() {

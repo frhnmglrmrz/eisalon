@@ -35,6 +35,7 @@ class RegisterController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'phone' => $validated['phone'] ?? null,
         ]);
 
         Auth::login($user);
