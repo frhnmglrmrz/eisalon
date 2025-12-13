@@ -6,6 +6,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\XenditWebhookController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\Admin\AdminServiceController;
 use App\Http\Controllers\Admin\AdminTherapistController;
 use App\Http\Controllers\Admin\AdminBookingController;
@@ -15,6 +16,10 @@ use App\Http\Controllers\Admin\AdminNotificationController;
 
 // Home
 Route::get('/', [ServiceController::class, 'index'])->name('home');
+
+// E-Catalog (Public)
+Route::get('catalog', [CatalogController::class, 'index'])->name('catalog.index');
+Route::get('catalog/booking/{service}', [CatalogController::class, 'showBookingForm'])->name('catalog.booking');
 
 // Database Check (for testing only)
 Route::get('/check-database', function() {

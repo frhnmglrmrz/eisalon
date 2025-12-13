@@ -186,6 +186,9 @@
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="{{ route('home') }}" class="text-gray-700 hover:text-pink-600 transition font-medium">Services</a>
+                    <a href="{{ route('catalog.index') }}" class="text-gray-700 hover:text-pink-600 transition font-medium">
+                        <i class="fas fa-book mr-1"></i>E-Catalog
+                    </a>
                     
                     @auth
                         <!-- Notification Bell -->
@@ -307,6 +310,9 @@
             <!-- Mobile Menu -->
             <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4">
                 <a href="{{ route('home') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Services</a>
+                <a href="{{ route('catalog.index') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">
+                    <i class="fas fa-book mr-2"></i>E-Catalog
+                </a>
                 @auth
                     @if(auth()->user()->isAdmin())
                         <a href="{{ route('admin.dashboard') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Admin Dashboard</a>
@@ -376,6 +382,7 @@
                     <h4 class="font-bold text-gray-800 mb-4">Quick Links</h4>
                     <ul class="space-y-2">
                         <li><a href="{{ route('home') }}" class="text-gray-600 hover:text-pink-600 transition">Services</a></li>
+                        <li><a href="{{ route('catalog.index') }}" class="text-gray-600 hover:text-pink-600 transition">E-Catalog</a></li>
                         <li><a href="#" class="text-gray-600 hover:text-pink-600 transition">About Us</a></li>
                         <li><a href="#" class="text-gray-600 hover:text-pink-600 transition">Contact</a></li>
                     </ul>

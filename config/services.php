@@ -41,4 +41,8 @@ return [
         'base_url' => env('XENDIT_BASE_URL', 'https://api.xendit.co'),
     ],
 
+    'whatsapp' => [
+        'phone_number' => env('WHATSAPP_PHONE_NUMBER', '6281234567890'), // Format: 6281234567890 (tanpa +)
+    ],
+
 ];
