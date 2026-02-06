@@ -170,264 +170,304 @@
     
     @stack('styles')
 </head>
-<body class="min-h-screen">
-    <!-- Navigation -->
-    <nav class="glass-effect fixed w-full top-0 z-50 shadow-lg">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <!-- Logo -->
-                <a href="{{ route('home') }}" class="flex items-center space-x-2">
-                    <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
-                        <i class="fas fa-spa text-white text-xl"></i>
-                    </div>
-                    <span class="text-2xl font-bold gradient-text">Ei Salon</span>
-                </a>
+<body class="min-h-screen bg-gray-50 font-sans text-gray-900 antialiased" x-data="{ sidebarOpen: false }">
+    @auth
+        <!-- Authenticated Layout (Sidebar) -->
+        <div class="flex h-screen overflow-hidden bg-gray-100">
+            <!-- Sidebar -->
+            <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white/80 backdrop-blur-xl border-r border-gray-200 transition-transform duration-300 ease-in-out transform lg:translate-x-0 lg:static lg:inset-0 shadow-lg"
+                   :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
                 
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="{{ route('home') }}" class="text-gray-700 hover:text-pink-600 transition font-medium">Home</a>
-                    <a href="{{ route('services.index') }}" class="text-gray-700 hover:text-pink-600 transition font-medium">Services</a>
-                    <a href="{{ route('catalog.index') }}" class="text-gray-700 hover:text-pink-600 transition font-medium">
-                        <i class="fas fa-book mr-1"></i>E-Catalog
-                    </a>
-                    
-                    @auth
-                        <!-- Notification Bell -->
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" class="text-gray-700 hover:text-pink-600 transition relative">
-                                <i class="fas fa-bell text-xl"></i>
-                                @if(auth()->user()->unreadNotifications->count() > 0)
-                                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">
-                                        {{ auth()->user()->unreadNotifications->count() }}
-                                    </span>
-                                @endif
-                            </button>
-
-                            <!-- Dropdown -->
-                            <div x-show="open" 
-                                 @click.away="open = false"
-                                 class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl overflow-hidden z-50 border border-gray-100"
-                                 style="display: none;">
-                                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                                    <h3 class="font-bold text-gray-800">Notifications</h3>
-                                    @if(auth()->user()->unreadNotifications->count() > 0)
-                                        <form action="{{ route('notifications.mark-all-read') }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="text-xs text-pink-500 hover:text-pink-700 font-medium">
-                                                Mark all read
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
-                                <div class="max-h-96 overflow-y-auto">
-                                    @forelse(auth()->user()->notifications as $notification)
-                                        <div class="p-4 border-b border-gray-100 hover:bg-pink-50 transition {{ $notification->read_at ? 'opacity-75' : 'bg-white' }}">
-                                            <a href="{{ route('notifications.mark-read', $notification->id) }}" class="flex items-start">
-                                                <div class="flex-shrink-0 mr-3">
-                                                    @if($notification->data['type'] == 'payment_received')
-                                                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-500">
-                                                            <i class="fas fa-money-bill-wave"></i>
-                                                        </div>
-                                                    @else
-                                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-500">
-                                                            <i class="fas fa-check-circle"></i>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm text-gray-800 {{ $notification->read_at ? '' : 'font-bold' }}">
-                                                        {{ $notification->data['message'] }}
-                                                    </p>
-                                                    <p class="text-xs text-gray-500 mt-1">
-                                                        {{ $notification->created_at->diffForHumans() }}
-                                                    </p>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    @empty
-                                        <div class="p-8 text-center text-gray-500">
-                                            <i class="far fa-bell-slash text-3xl mb-2"></i>
-                                            <p>No notifications yet</p>
-                                        </div>
-                                    @endforelse
-                                </div>
-                            </div>
+                <!-- Sidebar Header -->
+                <div class="h-16 flex items-center justify-center border-b border-gray-100/50">
+                    <a href="{{ route('home') }}" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center shadow-md">
+                            <i class="fas fa-spa text-white text-sm"></i>
                         </div>
-
-                        @if(auth()->user()->isAdmin())
-                            <div x-data="{ open: false }" class="relative">
-                                <button @click="open = !open" class="text-gray-700 hover:text-pink-600 transition font-medium flex items-center">
-                                    <i class="fas fa-cog mr-2"></i>Admin
-                                    <i class="fas fa-chevron-down ml-1 text-xs"></i>
-                                </button>
-                                <div x-show="open" 
-                                     @click.away="open = false"
-                                     class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl overflow-hidden z-50 border border-gray-100"
-                                     style="display: none;">
-                                    <div class="py-2">
-                                        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-pink-50 transition">
-                                            <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
-                                        </a>
-                                        <a href="{{ route('admin.services.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-pink-50 transition">
-                                            <i class="fas fa-spa mr-2"></i>Services
-                                        </a>
-                                        <a href="{{ route('admin.therapists.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-pink-50 transition">
-                                            <i class="fas fa-user-md mr-2"></i>Therapists
-                                        </a>
-                                        <a href="{{ route('admin.bookings.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-pink-50 transition">
-                                            <i class="fas fa-calendar-check mr-2"></i>Bookings
-                                        </a>
-                                        <a href="{{ route('admin.payments.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-pink-50 transition">
-                                            <i class="fas fa-money-bill-wave mr-2"></i>Payments
-                                        </a>
-                                        <a href="{{ route('admin.reviews.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-pink-50 transition">
-                                            <i class="fas fa-star mr-2"></i>Reviews
-                                        </a>
-                                        <a href="{{ route('admin.notifications.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-pink-50 transition">
-                                            <i class="fas fa-bell mr-2"></i>Notifications
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        @else
-                            <a href="{{ route('bookings.index') }}" class="text-gray-700 hover:text-pink-600 transition font-medium">My Bookings</a>
-                        @endif
-                        <form action="{{ route('logout') }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit" class="text-gray-700 hover:text-pink-600 transition font-medium">Logout</button>
-                        </form>
-                    @else
-                        <a href="{{ route('login') }}" class="text-gray-700 hover:text-pink-600 transition font-medium">Login</a>
-                        <a href="{{ route('register') }}" class="btn-primary text-white px-6 py-2 rounded-full font-medium">Register</a>
-                    @endauth
+                        <span class="text-xl font-bold gradient-text">Ei Salon</span>
+                    </a>
                 </div>
-                
-                <!-- Mobile Menu Button -->
-                <button id="mobile-menu-btn" class="md:hidden text-gray-700">
-                    <i class="fas fa-bars text-2xl"></i>
-                </button>
-            </div>
-            
-            <!-- Mobile Menu -->
-            <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4">
-                <a href="{{ route('home') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Home</a>
-                <a href="{{ route('services.index') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Services</a>
-                <a href="{{ route('catalog.index') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">
-                    <i class="fas fa-book mr-2"></i>E-Catalog
-                </a>
-                @auth
+
+                <!-- Sidebar Content -->
+                <div class="overflow-y-auto h-[calc(100vh-4rem)] py-4 px-3 space-y-1">
+                    
                     @if(auth()->user()->isAdmin())
-                        <a href="{{ route('admin.dashboard') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Admin Dashboard</a>
-                        <a href="{{ route('admin.services.index') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Services</a>
-                        <a href="{{ route('admin.therapists.index') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Therapists</a>
-                        <a href="{{ route('admin.bookings.index') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Bookings</a>
-                        <a href="{{ route('admin.payments.index') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Payments</a>
-                        <a href="{{ route('admin.reviews.index') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Reviews</a>
-                        <a href="{{ route('admin.notifications.index') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Notifications</a>
+                        <!-- ADMIN MENU -->
+                        <div class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Administration</div>
+                        
+                        <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-all group {{ request()->routeIs('admin.dashboard') ? 'bg-pink-50 text-pink-600 shadow-sm' : '' }}">
+                            <i class="fas fa-tachometer-alt w-5 h-5 mr-3 {{ request()->routeIs('admin.dashboard') ? 'text-pink-600' : 'text-gray-400 group-hover:text-pink-500' }}"></i>
+                            <span class="font-medium">Dashboard</span>
+                        </a>
+
+                        <a href="{{ route('admin.services.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-all group {{ request()->routeIs('admin.services.*') ? 'bg-pink-50 text-pink-600 shadow-sm' : '' }}">
+                            <i class="fas fa-spa w-5 h-5 mr-3 {{ request()->routeIs('admin.services.*') ? 'text-pink-600' : 'text-gray-400 group-hover:text-pink-500' }}"></i>
+                            <span class="font-medium">Services</span>
+                        </a>
+
+                        <a href="{{ route('admin.therapists.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-all group {{ request()->routeIs('admin.therapists.*') ? 'bg-pink-50 text-pink-600 shadow-sm' : '' }}">
+                            <i class="fas fa-user-md w-5 h-5 mr-3 {{ request()->routeIs('admin.therapists.*') ? 'text-pink-600' : 'text-gray-400 group-hover:text-pink-500' }}"></i>
+                            <span class="font-medium">Therapists</span>
+                        </a>
+
+                        <a href="{{ route('admin.bookings.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-all group {{ request()->routeIs('admin.bookings.*') ? 'bg-pink-50 text-pink-600 shadow-sm' : '' }}">
+                            <i class="fas fa-calendar-check w-5 h-5 mr-3 {{ request()->routeIs('admin.bookings.*') ? 'text-pink-600' : 'text-gray-400 group-hover:text-pink-500' }}"></i>
+                            <span class="font-medium">Bookings</span>
+                        </a>
+
+                        <a href="{{ route('admin.payments.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-all group {{ request()->routeIs('admin.payments.*') ? 'bg-pink-50 text-pink-600 shadow-sm' : '' }}">
+                            <i class="fas fa-money-bill-wave w-5 h-5 mr-3 {{ request()->routeIs('admin.payments.*') ? 'text-pink-600' : 'text-gray-400 group-hover:text-pink-500' }}"></i>
+                            <span class="font-medium">Payments</span>
+                        </a>
+
+                        <a href="{{ route('admin.reviews.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-all group {{ request()->routeIs('admin.reviews.*') ? 'bg-pink-50 text-pink-600 shadow-sm' : '' }}">
+                            <i class="fas fa-star w-5 h-5 mr-3 {{ request()->routeIs('admin.reviews.*') ? 'text-pink-600' : 'text-gray-400 group-hover:text-pink-500' }}"></i>
+                            <span class="font-medium">Reviews</span>
+                        </a>
+                        
+                        <a href="{{ route('admin.notifications.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-all group {{ request()->routeIs('admin.notifications.*') ? 'bg-pink-50 text-pink-600 shadow-sm' : '' }}">
+                            <i class="fas fa-bell w-5 h-5 mr-3 {{ request()->routeIs('admin.notifications.*') ? 'text-pink-600' : 'text-gray-400 group-hover:text-pink-500' }}"></i>
+                            <span class="font-medium">Notifications</span>
+                        </a>
+
                     @else
-                        <a href="{{ route('bookings.index') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">My Bookings</a>
+                        <!-- CUSTOMER MENU -->
+                        <div class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu</div>
+
+                         <a href="{{ route('home') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-all group {{ request()->routeIs('home') ? 'bg-pink-50 text-pink-600 shadow-sm' : '' }}">
+                            <i class="fas fa-home w-5 h-5 mr-3 {{ request()->routeIs('home') ? 'text-pink-600' : 'text-gray-400 group-hover:text-pink-500' }}"></i>
+                            <span class="font-medium">Home</span>
+                        </a>
+
+                        <a href="{{ route('services.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-all group {{ request()->routeIs('services.*') ? 'bg-pink-50 text-pink-600 shadow-sm' : '' }}">
+                            <i class="fas fa-spa w-5 h-5 mr-3 {{ request()->routeIs('services.*') ? 'text-pink-600' : 'text-gray-400 group-hover:text-pink-500' }}"></i>
+                            <span class="font-medium">Home Service</span>
+                        </a>
+
+                        <a href="{{ route('catalog.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-all group {{ request()->routeIs('catalog.*') ? 'bg-pink-50 text-pink-600 shadow-sm' : '' }}">
+                            <i class="fas fa-book-open w-5 h-5 mr-3 {{ request()->routeIs('catalog.*') ? 'text-pink-600' : 'text-gray-400 group-hover:text-pink-500' }}"></i>
+                            <span class="font-medium">E-Catalog</span>
+                        </a>
+
+                        <a href="{{ route('bookings.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-all group {{ request()->routeIs('bookings.*') ? 'bg-pink-50 text-pink-600 shadow-sm' : '' }}">
+                            <i class="fas fa-calendar-alt w-5 h-5 mr-3 {{ request()->routeIs('bookings.*') ? 'text-pink-600' : 'text-gray-400 group-hover:text-pink-500' }}"></i>
+                            <span class="font-medium">My Bookings</span>
+                        </a>
                     @endif
-                    <form action="{{ route('logout') }}" method="POST">
+                    
+                    <div class="border-t border-dashed border-gray-200 my-2 mx-4"></div>
+
+                    <!-- PROFILE & LOGOUT -->
+                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="block py-2 text-gray-700 hover:text-pink-600 transition w-full text-left">Logout</button>
+                        <button type="submit" class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all group">
+                            <i class="fas fa-sign-out-alt w-5 h-5 mr-3 text-gray-400 group-hover:text-red-500"></i>
+                            <span class="font-medium">Logout</span>
+                        </button>
                     </form>
-                @else
-                    <a href="{{ route('login') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Login</a>
-                    <a href="{{ route('register') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Register</a>
-                @endauth
+
+                </div>
+            </aside>
+
+            <!-- Main Content Wrapper -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <!-- Mobile Header -->
+                <header class="flex items-center justify-between p-4 bg-white shadow-sm lg:hidden z-40">
+                    <button @click="sidebarOpen = true" class="text-gray-500 focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                    <span class="font-bold text-lg gradient-text">Ei Salon</span>
+                    <div class="w-8"></div> <!-- Spacer for center alignment logic if needed -->
+                </header>
+
+                <!-- Scrollable Main Content -->
+                <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 lg:p-8">
+                     @if(session('success'))
+                        <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl animate-fadeIn shadow-sm flex items-center" role="alert">
+                            <i class="fas fa-check-circle mr-3 text-xl"></i>
+                            <div>{{ session('success') }}</div>
+                        </div>
+                    @endif
+                    
+                    @if($errors->any())
+                        <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-4 rounded-xl animate-fadeIn shadow-sm" role="alert">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-exclamation-triangle mr-3 text-xl"></i>
+                                <span class="font-bold">There were some problems with your input:</span>
+                            </div>
+                            <ul class="list-disc list-inside ml-8 text-sm">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @yield('content')
+                </main>
+            </div>
+
+            <!-- Overlay for Mobile Sidebar -->
+            <div x-show="sidebarOpen" @click="sidebarOpen = false" 
+                 x-transition:enter="transition-opacity ease-linear duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition-opacity ease-linear duration-300"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden text-white" style="display: none;">
             </div>
         </div>
-    </nav>
-    
-    <!-- Main Content -->
-    <div class="pt-20">
-        @if(session('success'))
-            <div class="container mx-auto px-6 mt-4">
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg animate-fadeIn" role="alert">
-                    <i class="fas fa-check-circle mr-2"></i>
-                    {{ session('success') }}
-                </div>
-            </div>
-        @endif
+
+    @else
+        <!-- Guest Layout (Existing Navbar) -->
         
-        @if($errors->any())
-            <div class="container mx-auto px-6 mt-4">
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg animate-fadeIn" role="alert">
-                    <i class="fas fa-exclamation-circle mr-2"></i>
-                    <ul class="list-disc list-inside">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        @endif
-        
-        @yield('content')
-    </div>
-    
-    <!-- Footer -->
-    <footer class="glass-effect mt-20 border-t border-gray-200">
-        <div class="container mx-auto px-6 py-12">
-            <div class="grid md:grid-cols-4 gap-8">
-                <div>
-                    <div class="flex items-center space-x-2 mb-4">
+        <!-- Navigation -->
+        <nav class="glass-effect fixed w-full top-0 z-50 shadow-lg" x-data="{ mobileMenuOpen: false }">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <!-- Logo -->
+                    <a href="{{ route('home') }}" class="flex items-center space-x-2">
                         <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
                             <i class="fas fa-spa text-white text-xl"></i>
                         </div>
                         <span class="text-2xl font-bold gradient-text">Ei Salon</span>
+                    </a>
+                    
+                    <!-- Desktop Menu -->
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="{{ route('home') }}" class="text-gray-700 hover:text-pink-600 transition font-medium">Home</a>
+                        <a href="{{ route('services.index') }}" class="text-gray-700 hover:text-pink-600 transition font-medium">Services</a>
+                        <a href="{{ route('catalog.index') }}" class="text-gray-700 hover:text-pink-600 transition font-medium">
+                            <i class="fas fa-book mr-1"></i>E-Catalog
+                        </a>
+                        <a href="{{ route('login') }}" class="text-gray-700 hover:text-pink-600 transition font-medium">Login</a>
+                        <a href="{{ route('register') }}" class="btn-primary text-white px-6 py-2 rounded-full font-medium">Register</a>
                     </div>
-                    <p class="text-gray-600">Your premium beauty and wellness destination</p>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-gray-700 focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
                 </div>
                 
-                <div>
-                    <h4 class="font-bold text-gray-800 mb-4">Quick Links</h4>
-                    <ul class="space-y-2">
-                        <li><a href="{{ route('home') }}" class="text-gray-600 hover:text-pink-600 transition">Home</a></li>
-                        <li><a href="{{ route('services.index') }}" class="text-gray-600 hover:text-pink-600 transition">Services</a></li>
-                        <li><a href="{{ route('catalog.index') }}" class="text-gray-600 hover:text-pink-600 transition">E-Catalog</a></li>
-                        <li><a href="{{ route('home') }}#about" class="text-gray-600 hover:text-pink-600 transition">About Us</a></li>
-                        <li><a href="{{ route('home') }}#contact" class="text-gray-600 hover:text-pink-600 transition">Contact</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h4 class="font-bold text-gray-800 mb-4">Contact</h4>
-                    <ul class="space-y-2 text-gray-600">
-                        <li><i class="fas fa-phone mr-2"></i> +62 xxx xxxx xxxx</li>
-                        <li><i class="fas fa-envelope mr-2"></i> info@eisalon.com</li>
-                        <li><i class="fas fa-map-marker-alt mr-2"></i> Jakarta, Indonesia</li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h4 class="font-bold text-gray-800 mb-4">Follow Us</h4>
-                    <div class="flex space-x-4">
-                        <a href="#" class="w-10 h-10 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center text-white hover:shadow-lg transition">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center text-white hover:shadow-lg transition">
-                            <i class="fab fa-facebook"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center text-white hover:shadow-lg transition">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                    </div>
+                <!-- Mobile Menu -->
+                <div x-show="mobileMenuOpen" 
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 transform -translate-y-2"
+                     x-transition:enter-end="opacity-100 transform translate-y-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 transform translate-y-0"
+                     x-transition:leave-end="opacity-0 transform -translate-y-2"
+                     class="md:hidden mt-4 pb-4 border-t border-gray-100 pt-4 space-y-3" style="display: none;">
+                     
+                    <a href="{{ route('home') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Home</a>
+                    <a href="{{ route('services.index') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Services</a>
+                    <a href="{{ route('catalog.index') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">
+                        <i class="fas fa-book mr-2"></i>E-Catalog
+                    </a>
+                    <div class="border-t border-gray-100 my-2"></div>
+                    <a href="{{ route('login') }}" class="block py-2 text-gray-700 hover:text-pink-600 transition">Login</a>
+                    <a href="{{ route('register') }}" class="block w-full text-center py-2 btn-primary text-white rounded-lg transition shadow-md">Register</a>
                 </div>
             </div>
+        </nav>
+        
+        <!-- Main Content (Guest) -->
+        <div class="pt-24 min-h-screen flex flex-col">
+            @if(session('success'))
+                <div class="container mx-auto px-6 mt-4">
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg animate-fadeIn" role="alert">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        {{ session('success') }}
+                    </div>
+                </div>
+            @endif
             
-            <div class="border-t border-gray-200 mt-8 pt-8 text-center text-gray-600">
-                <p>&copy; 2024 Ei Salon. All rights reserved.</p>
+            @if($errors->any())
+                <div class="container mx-auto px-6 mt-4">
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg animate-fadeIn" role="alert">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <ul class="list-disc list-inside">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
+            
+            <div class="flex-grow">
+                @yield('content')
             </div>
+
+            <!-- Footer (Guest Only) -->
+            <footer class="glass-effect mt-20 border-t border-gray-200">
+                <div class="container mx-auto px-6 py-12">
+                    <div class="grid md:grid-cols-4 gap-8">
+                        <div>
+                            <div class="flex items-center space-x-2 mb-4">
+                                <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-spa text-white text-xl"></i>
+                                </div>
+                                <span class="text-2xl font-bold gradient-text">Ei Salon</span>
+                            </div>
+                            <p class="text-gray-600">Your premium beauty and wellness destination</p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-4">Quick Links</h4>
+                            <ul class="space-y-2">
+                                <li><a href="{{ route('home') }}" class="text-gray-600 hover:text-pink-600 transition">Home</a></li>
+                                <li><a href="{{ route('services.index') }}" class="text-gray-600 hover:text-pink-600 transition">Services</a></li>
+                                <li><a href="{{ route('catalog.index') }}" class="text-gray-600 hover:text-pink-600 transition">E-Catalog</a></li>
+                                <li><a href="{{ route('home') }}#about" class="text-gray-600 hover:text-pink-600 transition">About Us</a></li>
+                                <li><a href="{{ route('home') }}#contact" class="text-gray-600 hover:text-pink-600 transition">Contact</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-4">Contact</h4>
+                            <ul class="space-y-2 text-gray-600">
+                                <li><i class="fas fa-phone mr-2"></i> +62 xxx xxxx xxxx</li>
+                                <li><i class="fas fa-envelope mr-2"></i> info@eisalon.com</li>
+                                <li><i class="fas fa-map-marker-alt mr-2"></i> Jakarta, Indonesia</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-4">Follow Us</h4>
+                            <div class="flex space-x-4">
+                                <a href="#" class="w-10 h-10 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center text-white hover:shadow-lg transition">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center text-white hover:shadow-lg transition">
+                                    <i class="fab fa-facebook"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center text-white hover:shadow-lg transition">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-200 mt-8 pt-8 text-center text-gray-600">
+                        <p>&copy; 2024 Ei Salon. All rights reserved.</p>
+                    </div>
+                </div>
+            </footer>
         </div>
-    </footer>
-    
+    @endauth
+
     <script>
         // Mobile menu toggle
-        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        });
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', function() {
+                const menu = document.getElementById('mobile-menu');
+                menu.classList.toggle('hidden');
+            });
+        }
         
         // Auto-hide alerts after 5 seconds
         setTimeout(() => {

@@ -58,6 +58,13 @@ class AdminPaymentController extends Controller
             'paid_at' => $validated['status'] === 'paid' ? now() : $payment->paid_at,
         ]);
 
+        // Sync Booking Status
+        if ($validated['status'] === 'paid') {
+            $payment->booking->update(['status' => 'confirmed']);
+        } elseif (in_array($validated['status'], ['expired', 'failed'])) {
+            $payment->booking->update(['status' => 'cancelled']);
+        }
+
         return redirect()->route('admin.payments.show', $payment)
             ->with('success', 'Payment status updated successfully.');
     }

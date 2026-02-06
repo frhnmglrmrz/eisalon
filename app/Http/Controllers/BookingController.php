@@ -5,19 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\Service;
 use App\Models\Therapist;
-use App\Services\XenditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
-    protected $xenditService;
-
-    public function __construct(XenditService $xenditService)
-    {
-        $this->xenditService = $xenditService;
-    }
-
     /**
      * Display user's bookings
      */
@@ -83,16 +75,28 @@ class BookingController extends Controller
             'status' => 'pending',
         ]);
 
-        // Create Xendit invoice
-        $paymentResult = $this->xenditService->createInvoice($booking);
-
-        if ($paymentResult['success']) {
-            return redirect()->away($paymentResult['invoice_url']);
-        }
-
-        return back()->withErrors([
-            'payment' => 'Failed to create payment. Please try again.'
+        // Create manual Payment record
+        $payment = \App\Models\Payment::create([
+            'booking_id' => $booking->id,
+            'xendit_invoice_id' => 'WA-' . $booking->id . '-' . time(), // Dummy ID for manual payment
+            'amount' => $booking->total_price,
+            'status' => 'pending',
+            'payment_method' => 'Manual Transfer',
         ]);
+
+        // Construct WhatsApp Message
+        $phoneNumber = '6289523808660'; // Admin Phone Number
+        $message = "Halo Admin, saya ingin konfirmasi booking:\n\n" .
+                   "Booking ID: #{$booking->id}\n" .
+                   "Nama: {$user->name}\n" .
+                   "Service: {$service->name}\n" .
+                   "Tanggal: {$validated['booking_date']}\n" .
+                   "Total: Rp " . number_format($booking->total_price, 0, ',', '.') . "\n\n" .
+                   "Mohon info pembayaran selanjutnya. Terima kasih.";
+
+        $whatsappUrl = "https://wa.me/{$phoneNumber}?text=" . urlencode($message);
+
+        return redirect()->away($whatsappUrl);
     }
 
     /**
@@ -131,11 +135,6 @@ class BookingController extends Controller
         }
 
         $booking->update(['status' => 'cancelled']);
-
-        // Expire Xendit invoice if exists
-        if ($booking->payment) {
-            $this->xenditService->expireInvoice($booking->payment->xendit_invoice_id);
-        }
 
         return redirect()->route('bookings.index')
             ->with('success', 'Booking cancelled successfully');
