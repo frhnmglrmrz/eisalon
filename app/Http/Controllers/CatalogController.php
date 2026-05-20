@@ -119,8 +119,14 @@ class CatalogController extends Controller
             'whatsapp_message' => $whatsappMessage,
         ]);
 
-        // Get WhatsApp number from config
-        $whatsappNumber = config('services.whatsapp.phone_number', '6281234567890');
+        // Get Admin WhatsApp number from database
+        $admin = \App\Models\User::where('role', 'admin')->first();
+        $whatsappNumber = $admin->phone ?? '089523808660'; // Admin Phone Number from DB with fallback
+        
+        // Ensure it starts with 62 instead of 0 if it starts with 0
+        if (str_starts_with($whatsappNumber, '0')) {
+            $whatsappNumber = '62' . substr($whatsappNumber, 1);
+        }
         
         // Encode message for URL
         $encodedMessage = urlencode($whatsappMessage);
