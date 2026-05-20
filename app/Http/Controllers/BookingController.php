@@ -85,7 +85,8 @@ class BookingController extends Controller
         ]);
 
         // Construct WhatsApp Message
-        $phoneNumber = '6289523808660'; // Admin Phone Number
+        $admin = \App\Models\User::where('role', 'admin')->first();
+        $phoneNumber = $admin->phone ?? '089523808660'; // Admin Phone Number from DB with fallback
         $message = "Halo Admin, saya ingin konfirmasi booking:\n\n" .
                    "Booking ID: #{$booking->id}\n" .
                    "Nama: {$user->name}\n" .
