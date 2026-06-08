@@ -123,15 +123,56 @@
                         <label for="time" class="block text-gray-700 font-bold mb-2">
                             <i class="far fa-clock mr-2"></i>Waktu Pemesanan *
                         </label>
-                        <input 
-                            type="time" 
+                        <select 
                             id="time" 
                             name="time" 
                             required
-                            class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none"
+                            class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none bg-white"
                         >
+                            <option value="">Pilih Tanggal Dahulu</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Pilih waktu dari slot yang tersedia</p>
                     </div>
                 </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const dateInput = document.getElementById('date');
+                        const timeSelect = document.getElementById('time');
+
+                        dateInput.addEventListener('change', function() {
+                            const date = this.value;
+                            if (!date) return;
+
+                            timeSelect.innerHTML = '<option value="">Memuat slot...</option>';
+                            timeSelect.disabled = true;
+
+                            fetch(`{{ route('catalog.api.slots') }}?date=${date}`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    timeSelect.innerHTML = '<option value="">Pilih Waktu</option>';
+                                    timeSelect.disabled = false;
+                                    
+                                    if (data.slots.length === 0) {
+                                        timeSelect.innerHTML = '<option value="">Tidak ada slot tersedia di tanggal ini</option>';
+                                        timeSelect.disabled = true;
+                                        return;
+                                    }
+
+                                    data.slots.forEach(slot => {
+                                        const option = document.createElement('option');
+                                        option.value = slot.time;
+                                        option.textContent = slot.time;
+                                        timeSelect.appendChild(option);
+                                    });
+                                })
+                                .catch(err => {
+                                    console.error(err);
+                                    timeSelect.innerHTML = '<option value="">Gagal memuat slot</option>';
+                                });
+                        });
+                    });
+                </script>
 
                 <!-- Catatan -->
                 <div>

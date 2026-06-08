@@ -57,12 +57,26 @@ class CatalogController extends Controller
         return view('catalog.index', compact('services', 'categories', 'servicesByCategory'));
     }
 
-    /**
-     * Show booking form for WhatsApp
-     */
     public function showBookingForm(Service $service)
     {
         return view('catalog.booking-form', compact('service'));
+    }
+
+    public function availableSlots(Request $request)
+    {
+        $date = $request->query('date', date('Y-m-d'));
+        $slots = \App\Models\BookingSlot::where('date', $date)
+            ->where('is_booked', false)
+            ->orderBy('time')
+            ->get(['id', 'time']);
+
+        // Format times to H:i
+        $slots->transform(function ($slot) {
+            $slot->time = \Carbon\Carbon::parse($slot->time)->format('H:i');
+            return $slot;
+        });
+
+        return response()->json(['slots' => $slots]);
     }
 
     /**
@@ -86,55 +100,55 @@ class CatalogController extends Controller
         $formattedPhone = preg_replace('/^0/', '62', $validated['phone']);
         $formattedPhone = preg_replace('/\D/', '', $formattedPhone);
 
-        // Format date for message
-        $formattedDate = $bookingDateTime->locale('id')->isoFormat('dddd, D MMMM YYYY');
-        $formattedTime = $bookingDateTime->format('H:i');
-
-        // Create WhatsApp message
-        $whatsappMessage = "Halo, saya ingin memesan layanan:\n\n";
-        $whatsappMessage .= "*Layanan:* {$service->name}\n";
-        $whatsappMessage .= "*Harga:* Rp " . number_format($service->price, 0, ',', '.') . "\n";
-        $whatsappMessage .= "*Durasi:* {$service->duration} menit\n\n";
-        $whatsappMessage .= "*Data Pemesanan:*\n";
-        $whatsappMessage .= "Nama: {$validated['name']}\n";
-        $whatsappMessage .= "Nomor WhatsApp: {$validated['phone']}\n";
-        $whatsappMessage .= "Tanggal: {$formattedDate}\n";
-        $whatsappMessage .= "Waktu: {$formattedTime}\n";
-        if (!empty($validated['notes'])) {
-            $whatsappMessage .= "Catatan: {$validated['notes']}\n";
+        // Get or Create User
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user) {
+            $user = \App\Models\User::firstOrCreate(
+                ['phone' => $formattedPhone],
+                [
+                    'name' => $validated['name'],
+                    'email' => $validated['email'] ?? $formattedPhone . '@eisalon.local',
+                    'password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(12)),
+                    'role' => 'customer',
+                ]
+            );
         }
-        $whatsappMessage .= "\nMohon konfirmasi ketersediaan untuk waktu tersebut. Terima kasih!";
 
-        // Save to database
-        $whatsappBooking = WhatsAppBooking::create([
+        // Create the booking in main table
+        $booking = \App\Models\Booking::create([
+            'user_id' => $user->id,
             'service_id' => $service->id,
-            'customer_name' => $validated['name'],
-            'customer_phone' => $validated['phone'],
-            'customer_email' => $validated['email'] ?? null,
             'booking_date' => $bookingDateTime,
+            'status' => 'pending',
             'notes' => $validated['notes'] ?? null,
             'total_price' => $service->price,
-            'payment_status' => 'pending',
-            'payment_method' => 'whatsapp',
-            'whatsapp_message' => $whatsappMessage,
         ]);
 
+        // Mark slot as booked
+        \App\Models\BookingSlot::where('date', $validated['date'])
+            ->where('time', \Carbon\Carbon::parse($validated['time'])->format('H:i:s'))
+            ->update(['is_booked' => true]);
+
+        // Redirect to success page
+        return redirect()->route('catalog.booking.success', $booking->id);
+    }
+
+    public function success(\App\Models\Booking $booking)
+    {
         // Get Admin WhatsApp number from database
         $admin = \App\Models\User::where('role', 'admin')->first();
-        $whatsappNumber = $admin->phone ?? '089523808660'; // Admin Phone Number from DB with fallback
+        $whatsappNumber = $admin->phone ?? '089523808660'; 
         
-        // Ensure it starts with 62 instead of 0 if it starts with 0
         if (str_starts_with($whatsappNumber, '0')) {
             $whatsappNumber = '62' . substr($whatsappNumber, 1);
         }
-        
-        // Encode message for URL
-        $encodedMessage = urlencode($whatsappMessage);
-        
-        // Create WhatsApp URL
-        $whatsappUrl = "https://wa.me/{$whatsappNumber}?text={$encodedMessage}";
 
-        // Redirect to WhatsApp
-        return redirect()->away($whatsappUrl)->with('success', 'Pemesanan berhasil disimpan! Anda akan diarahkan ke WhatsApp.');
+        return view('catalog.success', compact('booking', 'whatsappNumber'));
+    }
+
+    public function receipt(\App\Models\Booking $booking)
+    {
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.receipt', compact('booking'));
+        return $pdf->download('struk-booking-eisalon-' . $booking->id . '.pdf');
     }
 }

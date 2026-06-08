@@ -36,19 +36,19 @@
     <div class="container mx-auto px-6">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div class="animate-fadeIn">
-                <div class="text-4xl md:text-5xl font-bold gradient-text mb-2">{{ $stats['total_services'] }}+</div>
+                <div class="text-4xl md:text-5xl font-bold gradient-text mb-2"><span id="stat-services">{{ $stats['total_services'] }}</span>+</div>
                 <p class="text-gray-600 font-medium">Services</p>
             </div>
             <div class="animate-fadeIn" style="animation-delay: 0.1s;">
-                <div class="text-4xl md:text-5xl font-bold gradient-text mb-2">{{ $stats['categories'] }}</div>
+                <div class="text-4xl md:text-5xl font-bold gradient-text mb-2"><span id="stat-categories">{{ $stats['categories'] }}</span></div>
                 <p class="text-gray-600 font-medium">Categories</p>
             </div>
             <div class="animate-fadeIn" style="animation-delay: 0.2s;">
-                <div class="text-4xl md:text-5xl font-bold gradient-text mb-2">{{ number_format($stats['average_rating'], 1) }}</div>
+                <div class="text-4xl md:text-5xl font-bold gradient-text mb-2"><span id="stat-rating">{{ number_format($stats['average_rating'], 1) }}</span></div>
                 <p class="text-gray-600 font-medium">Average Rating</p>
             </div>
             <div class="animate-fadeIn" style="animation-delay: 0.3s;">
-                <div class="text-4xl md:text-5xl font-bold gradient-text mb-2">{{ $stats['total_reviews'] }}+</div>
+                <div class="text-4xl md:text-5xl font-bold gradient-text mb-2"><span id="stat-reviews">{{ $stats['total_reviews'] }}</span>+</div>
                 <p class="text-gray-600 font-medium">Happy Clients</p>
             </div>
         </div>
@@ -398,7 +398,49 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
+    .stat-update {
+        animation: pulse-green 1s;
+    }
+    @keyframes pulse-green {
+        0% { color: #10B981; transform: scale(1.1); }
+        100% { color: inherit; transform: scale(1); }
+    }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Real-time polling for home stats
+        setInterval(() => {
+            fetch('{{ route('home.api-stats') }}')
+                .then(response => response.json())
+                .then(data => {
+                    const stats = data.stats;
+                    
+                    const updateStat = (id, newValue) => {
+                        const el = document.getElementById(id);
+                        if (el && el.innerText != newValue) {
+                            el.innerText = newValue;
+                            el.classList.remove('stat-update');
+                            void el.offsetWidth; // trigger reflow
+                            el.classList.add('stat-update');
+                        }
+                    };
+
+                    updateStat('stat-services', stats.total_services);
+                    updateStat('stat-categories', stats.categories);
+                    
+                    // Format rating to 1 decimal place
+                    const formattedRating = parseFloat(stats.average_rating).toFixed(1);
+                    updateStat('stat-rating', formattedRating);
+                    
+                    updateStat('stat-reviews', stats.total_reviews);
+                })
+                .catch(err => console.error('Error fetching stats:', err));
+        }, 5000); // Poll every 5 seconds
+    });
+</script>
 @endpush
 @endsection
 

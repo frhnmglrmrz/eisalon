@@ -48,5 +48,27 @@ class HomeController extends Controller
 
         return view('home', compact('featuredServices', 'testimonials', 'stats'));
     }
+
+    /**
+     * API Endpoint for real-time home stats
+     */
+    public function apiStats()
+    {
+        $categoriesCount = Service::active()
+            ->select('category')
+            ->distinct()
+            ->count();
+
+        $stats = [
+            'total_services' => Service::active()->count(),
+            'total_reviews' => Review::count(),
+            'categories' => $categoriesCount,
+            'average_rating' => Review::avg('rating') ?? 0,
+        ];
+
+        return response()->json([
+            'stats' => $stats
+        ]);
+    }
 }
 

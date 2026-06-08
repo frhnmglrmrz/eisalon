@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\AdminNotificationController;
 
 // Home
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/api/home-stats', [HomeController::class, 'apiStats'])->name('home.api-stats');
 
 // Services Listing
 Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
@@ -25,6 +26,9 @@ Route::get('/services', [ServiceController::class, 'index'])->name('services.ind
 Route::get('catalog', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('catalog/booking/{service}', [CatalogController::class, 'showBookingForm'])->name('catalog.booking');
 Route::post('catalog/booking/{service}', [CatalogController::class, 'storeBooking'])->name('catalog.booking.store');
+Route::get('catalog/api/slots', [CatalogController::class, 'availableSlots'])->name('catalog.api.slots');
+Route::get('catalog/booking/success/{booking}', [CatalogController::class, 'success'])->name('catalog.booking.success');
+Route::get('catalog/booking/receipt/{booking}', [CatalogController::class, 'receipt'])->name('catalog.booking.receipt');
 
 // Database Check (for testing only)
 Route::get('/check-database', function() {
@@ -118,6 +122,7 @@ Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function ()
     Route::post('payments/{payment}/update-status', [AdminPaymentController::class, 'updateStatus'])->name('payments.update-status');
     Route::resource('reviews', AdminReviewController::class)->except(['create', 'store']);
     Route::get('notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+    Route::resource('slots', \App\Http\Controllers\Admin\AdminSlotController::class)->except(['show', 'edit', 'update']);
 });
 
 // Xendit Webhook (no CSRF protection needed)
