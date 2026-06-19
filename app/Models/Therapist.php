@@ -58,7 +58,7 @@ class Therapist extends Model
         // Cek apakah terapis sudah ada booking di waktu tersebut
         return !$this->bookings()
             ->where('booking_date', $dateTime)
-            ->whereIn('status', ['confirmed', 'in_progress'])
+            ->whereIn('status', ['pending', 'confirmed', 'in_progress'])
             ->exists();
     }
 }

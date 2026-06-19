@@ -165,23 +165,30 @@
             slots.forEach(slot => {
                 const slotBtn = document.createElement('button');
                 slotBtn.type = 'button';
-                slotBtn.className = 'time-slot-btn px-4 py-3 rounded-xl border-2 border-gray-200 hover:border-pink-500 transition font-medium';
-                slotBtn.textContent = slot.time;
-                slotBtn.dataset.datetime = slot.datetime;
                 
-                slotBtn.addEventListener('click', function() {
-                    document.querySelectorAll('.time-slot-btn').forEach(btn => {
-                        btn.classList.remove('bg-pink-500', 'text-white', 'border-pink-500');
-                        btn.classList.add('border-gray-200');
+                if (slot.is_available) {
+                    slotBtn.className = 'time-slot-btn px-4 py-3 rounded-xl border-2 border-gray-200 hover:border-pink-500 transition font-medium text-gray-800';
+                    slotBtn.textContent = slot.time;
+                    slotBtn.dataset.datetime = slot.datetime;
+                    
+                    slotBtn.addEventListener('click', function() {
+                        document.querySelectorAll('.time-slot-btn').forEach(btn => {
+                            btn.classList.remove('bg-pink-500', 'text-white', 'border-pink-500');
+                            btn.classList.add('border-gray-200', 'text-gray-800');
+                        });
+                        
+                        this.classList.add('bg-pink-500', 'text-white', 'border-pink-500');
+                        this.classList.remove('border-gray-200', 'text-gray-800');
+                        
+                        selectedTime = this.dataset.datetime;
+                        bookingDatetimeInput.value = selectedTime;
+                        submitBtn.disabled = false;
                     });
-                    
-                    this.classList.add('bg-pink-500', 'text-white', 'border-pink-500');
-                    this.classList.remove('border-gray-200');
-                    
-                    selectedTime = this.dataset.datetime;
-                    bookingDatetimeInput.value = selectedTime;
-                    submitBtn.disabled = false;
-                });
+                } else {
+                    slotBtn.className = 'px-4 py-3 rounded-xl border-2 border-gray-100 bg-gray-100 text-gray-400 font-medium cursor-not-allowed opacity-60';
+                    slotBtn.textContent = slot.time + ' - Booked';
+                    slotBtn.disabled = true;
+                }
                 
                 timeSlotsDiv.appendChild(slotBtn);
             });

@@ -57,7 +57,22 @@ class BookingController extends Controller
             $therapist = Therapist::findOrFail($validated['therapist_id']);
             if (!$therapist->isAvailableAt($validated['booking_date'])) {
                 return back()->withErrors([
-                    'therapist_id' => 'Therapist is not available at the selected time'
+                    'booking_date' => 'Therapist is not available at the selected time'
+                ])->withInput();
+            }
+        } else {
+            // Check if there is at least one therapist available for this service category at the selected time
+            $availableTherapistsCount = Therapist::available()
+                ->bySpecialization($service->category)
+                ->whereDoesntHave('bookings', function ($query) use ($validated) {
+                    $query->where('booking_date', $validated['booking_date'])
+                          ->whereIn('status', ['pending', 'confirmed', 'in_progress']);
+                })
+                ->count();
+
+            if ($availableTherapistsCount === 0) {
+                return back()->withErrors([
+                    'booking_date' => 'No therapists specializing in this service category are available at the selected time'
                 ])->withInput();
             }
         }
@@ -182,19 +197,28 @@ class BookingController extends Controller
             $timeSlot = $date . ' ' . str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00:00';
 
             // Check if slot is available
-            $isBooked = Booking::where('booking_date', $timeSlot)
-                ->whereIn('status', ['confirmed', 'in_progress'])
-                ->when(isset($validated['therapist_id']), function ($query) use ($validated) {
-                    return $query->where('therapist_id', $validated['therapist_id']);
-                })
-                ->exists();
-
-            if (!$isBooked) {
-                $slots[] = [
-                    'time' => date('H:i', strtotime($timeSlot)),
-                    'datetime' => $timeSlot,
-                ];
+            if (isset($validated['therapist_id'])) {
+                $isBooked = Booking::where('booking_date', $timeSlot)
+                    ->where('therapist_id', $validated['therapist_id'])
+                    ->whereIn('status', ['pending', 'confirmed', 'in_progress'])
+                    ->exists();
+            } else {
+                $availableTherapistsCount = Therapist::available()
+                    ->bySpecialization($service->category)
+                    ->whereDoesntHave('bookings', function ($query) use ($timeSlot) {
+                        $query->where('booking_date', $timeSlot)
+                              ->whereIn('status', ['pending', 'confirmed', 'in_progress']);
+                    })
+                    ->count();
+                
+                $isBooked = ($availableTherapistsCount === 0);
             }
+
+            $slots[] = [
+                'time' => date('H:i', strtotime($timeSlot)),
+                'datetime' => $timeSlot,
+                'is_available' => !$isBooked,
+            ];
         }
 
         return response()->json($slots);
