@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Service;
-use App\Models\Review;
+use App\Models\Gallery;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
@@ -14,61 +13,19 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // Get featured services (top 6 services)
-        $featuredServices = Service::with(['reviews'])
-            ->active()
+        // Ambil data layanan unggulan (is_active=true, limit 6)
+        $featuredServices = Service::active()
             ->latest()
             ->take(6)
-            ->get()
-            ->map(function ($service) {
-                $service->average_rating = $service->average_rating;
-                $service->total_reviews = $service->total_reviews;
-                return $service;
-            });
-
-        // Get latest testimonials/reviews
-        $testimonials = Review::with(['user', 'service'])
-            ->latest()
-            ->take(5)
             ->get();
 
-        // Get service categories for stats
-        $categories = Service::active()
-            ->select('category')
-            ->distinct()
-            ->pluck('category');
+        // Ambil data galeri terbaru (limit 8)
+        $latestGalleries = Gallery::with('service')
+            ->orderBy('sort_order', 'asc')
+            ->latest()
+            ->take(8)
+            ->get();
 
-        // Statistics
-        $stats = [
-            'total_services' => Service::active()->count(),
-            'total_reviews' => Review::count(),
-            'categories' => $categories->count(),
-            'average_rating' => Review::avg('rating') ?? 0,
-        ];
-
-        return view('home', compact('featuredServices', 'testimonials', 'stats'));
-    }
-
-    /**
-     * API Endpoint for real-time home stats
-     */
-    public function apiStats()
-    {
-        $categoriesCount = Service::active()
-            ->select('category')
-            ->distinct()
-            ->count();
-
-        $stats = [
-            'total_services' => Service::active()->count(),
-            'total_reviews' => Review::count(),
-            'categories' => $categoriesCount,
-            'average_rating' => Review::avg('rating') ?? 0,
-        ];
-
-        return response()->json([
-            'stats' => $stats
-        ]);
+        return view('home', compact('featuredServices', 'latestGalleries'));
     }
 }
-

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\User;
 use App\Models\Service;
-use App\Models\Therapist;
+use App\Models\Stylist;
 use Illuminate\Http\Request;
 
 class AdminBookingController extends Controller
@@ -16,57 +16,37 @@ class AdminBookingController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Booking::with(['user', 'service', 'therapist']);
+        $query = Booking::with(['user', 'service', 'stylist', 'slot']);
 
         // Filter by status
-        if ($request->has('status') && $request->status !== '') {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Search
-        if ($request->has('search')) {
-            $query->whereHas('user', function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%');
+        // Filter by date
+        if ($request->filled('date')) {
+            $query->where('booking_date', $request->date);
+        }
+
+        // Search by customer name, phone, or ID
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', $search)
+                  ->orWhere('guest_name', 'like', '%' . $search . '%')
+                  ->orWhere('guest_phone', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('phone', 'like', '%' . $search . '%');
+                  });
             });
         }
 
-        $bookings = $query->latest()->paginate(15);
+        $bookings = $query->orderBy('booking_date', 'desc')
+            ->orderBy('booking_time', 'desc')
+            ->paginate(15);
         
         return view('admin.bookings.index', compact('bookings'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $users = User::where('role', 'customer')->orderBy('name')->get();
-        $services = Service::where('is_active', true)->orderBy('name')->get();
-        $therapists = Therapist::where('is_available', true)->orderBy('name')->get();
-        
-        return view('admin.bookings.create', compact('users', 'services', 'therapists'));
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'service_id' => 'required|exists:services,id',
-            'therapist_id' => 'nullable|exists:therapists,id',
-            'booking_date' => 'required|date|after:now',
-            'status' => 'required|in:pending,confirmed,in_progress,completed,cancelled',
-            'notes' => 'nullable|string',
-            'total_price' => 'required|numeric|min:0',
-        ]);
-
-        Booking::create($validated);
-
-        return redirect()->route('admin.bookings.index')
-            ->with('success', 'Booking created successfully.');
     }
 
     /**
@@ -74,51 +54,77 @@ class AdminBookingController extends Controller
      */
     public function show(Booking $booking)
     {
-        $booking->load(['user', 'service', 'therapist', 'payment', 'review']);
+        $booking->load(['user', 'service', 'stylist', 'slot']);
         return view('admin.bookings.show', compact('booking'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Update the specified resource's status.
      */
-    public function edit(Booking $booking)
-    {
-        $users = User::where('role', 'customer')->orderBy('name')->get();
-        $services = Service::where('is_active', true)->orderBy('name')->get();
-        $therapists = Therapist::where('is_available', true)->orderBy('name')->get();
-        
-        return view('admin.bookings.edit', compact('booking', 'users', 'services', 'therapists'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Booking $booking)
+    public function updateStatus(Request $request, Booking $booking)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'service_id' => 'required|exists:services,id',
-            'therapist_id' => 'nullable|exists:therapists,id',
-            'booking_date' => 'required|date',
-            'status' => 'required|in:pending,confirmed,in_progress,completed,cancelled',
-            'notes' => 'nullable|string',
-            'total_price' => 'required|numeric|min:0',
+            'status' => 'required|in:pending,confirmed,completed,cancelled',
         ]);
 
-        $booking->update($validated);
+        $booking->update([
+            'status' => $validated['status']
+        ]);
 
-        return redirect()->route('admin.bookings.index')
-            ->with('success', 'Booking updated successfully.');
+        return redirect()->back()
+            ->with('success', 'Status reservasi #' . $booking->id . ' berhasil diubah menjadi ' . ucfirst($validated['status']) . '.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Generate manual WhatsApp link for confirmation/cancellation notifications
      */
-    public function destroy(Booking $booking)
+    public function generateWhatsapp(Booking $booking)
     {
-        $booking->delete();
+        $booking->load(['user', 'service', 'stylist']);
+        
+        $customerName = $booking->user ? $booking->user->name : $booking->guest_name;
+        $customerPhone = $booking->user ? $booking->user->phone : $booking->guest_phone;
+        
+        // Clean customer phone number
+        $customerPhone = preg_replace('/[^0-9]/', '', $customerPhone);
+        if (str_starts_with($customerPhone, '0')) {
+            $customerPhone = '62' . substr($customerPhone, 1);
+        }
 
-        return redirect()->route('admin.bookings.index')
-            ->with('success', 'Booking deleted successfully.');
+        $dateFormatted = \Carbon\Carbon::parse($booking->booking_date)->format('d F Y');
+        $timeFormatted = \Carbon\Carbon::parse($booking->booking_time)->format('H:i');
+        $stylistName = $booking->stylist ? $booking->stylist->name : 'Pilih Acak (Siapa Saja)';
+        
+        if ($booking->status === 'confirmed') {
+            $message = "Halo {$customerName},\n\n" .
+                       "Kami dari *Alan's Art Hair Salon* menginformasikan bahwa reservasi Anda telah **TERKONFIRMASI**:\n" .
+                       "- **ID Booking**: #{$booking->id}\n" .
+                       "- **Layanan**: {$booking->service->name}\n" .
+                       "- **Stylist**: {$stylistName}\n" .
+                       "- **Jadwal**: {$dateFormatted} jam {$timeFormatted} WIB\n\n" .
+                       "Sampai jumpa di salon! 😊";
+        } elseif ($booking->status === 'cancelled') {
+            $message = "Halo {$customerName},\n\n" .
+                       "Kami dari *Alan's Art Hair Salon* menginformasikan bahwa reservasi Anda dengan ID #{$booking->id} telah **DIBATALKAN**.\n\n" .
+                       "Mohon maaf atas ketidaknyamanannya. Silakan ajukan reservasi ulang jika berkenan. Terima kasih.";
+        } elseif ($booking->status === 'completed') {
+            $message = "Halo {$customerName},\n\n" .
+                       "Terima kasih telah melakukan perawatan di *Alan's Art Hair Salon*!\n" .
+                       "Reservasi ID #{$booking->id} Anda telah ditandai **SELESAI**.\n\n" .
+                       "Kami harap Anda senang dengan hasilnya. Ditunggu kunjungan berikutnya! Barber & Stylist kami siap melayani Anda kembali.";
+        } else {
+            $message = "Halo {$customerName},\n\n" .
+                       "Kami mengonfirmasi bahwa reservasi Anda dengan ID #{$booking->id} saat ini berstatus **PENDING** (Menunggu Konfirmasi).\n" .
+                       "- **Layanan**: {$booking->service->name}\n" .
+                       "- **Jadwal**: {$dateFormatted} jam {$timeFormatted} WIB\n\n" .
+                       "Kami akan segera mengirimkan konfirmasi. Terima kasih.";
+        }
+
+        $whatsappUrl = "https://wa.me/{$customerPhone}?text=" . urlencode($message);
+        
+        // Update whatsapp_sent_at timestamp
+        $booking->update(['whatsapp_sent_at' => now()]);
+
+        return redirect()->away($whatsappUrl);
     }
 }

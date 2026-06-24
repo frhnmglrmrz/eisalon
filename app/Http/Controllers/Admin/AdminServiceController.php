@@ -33,24 +33,24 @@ class AdminServiceController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
-            'duration' => 'required|integer|min:1',
-            'category' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'duration_minutes' => 'required|integer|min:1',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean',
         ]);
 
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('services', 'public');
+        if ($request->hasFile('photo')) {
+            $validated['photo'] = $request->file('photo')->store('services', 'public');
         }
 
         $validated['is_active'] = $request->has('is_active');
 
         Service::create($validated);
 
-        return redirect()->route('admin.services.index')
-            ->with('success', 'Service created successfully.');
+        return redirect()->route('admin.layanan.index')
+            ->with('success', 'Layanan berhasil ditambahkan.');
     }
 
     /**
@@ -58,7 +58,7 @@ class AdminServiceController extends Controller
      */
     public function show(Service $service)
     {
-        $service->load(['bookings', 'reviews.user']);
+        $service->load(['bookings', 'galleries']);
         return view('admin.services.show', compact('service'));
     }
 
@@ -77,27 +77,27 @@ class AdminServiceController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
-            'duration' => 'required|integer|min:1',
-            'category' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'duration_minutes' => 'required|integer|min:1',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean',
         ]);
 
-        if ($request->hasFile('image')) {
-            if ($service->image) {
-                Storage::disk('public')->delete($service->image);
+        if ($request->hasFile('photo')) {
+            if ($service->photo) {
+                Storage::disk('public')->delete($service->photo);
             }
-            $validated['image'] = $request->file('image')->store('services', 'public');
+            $validated['photo'] = $request->file('photo')->store('services', 'public');
         }
 
         $validated['is_active'] = $request->has('is_active');
 
         $service->update($validated);
 
-        return redirect()->route('admin.services.index')
-            ->with('success', 'Service updated successfully.');
+        return redirect()->route('admin.layanan.index')
+            ->with('success', 'Layanan berhasil diperbarui.');
     }
 
     /**
@@ -105,13 +105,20 @@ class AdminServiceController extends Controller
      */
     public function destroy(Service $service)
     {
-        if ($service->image) {
-            Storage::disk('public')->delete($service->image);
+        // JANGAN hapus hard jika sudah ada booking terkait, set is_active=false
+        if ($service->bookings()->exists()) {
+            $service->update(['is_active' => false]);
+            return redirect()->route('admin.layanan.index')
+                ->with('success', 'Layanan dinonaktifkan karena memiliki riwayat reservasi.');
+        }
+
+        if ($service->photo) {
+            Storage::disk('public')->delete($service->photo);
         }
 
         $service->delete();
 
-        return redirect()->route('admin.services.index')
-            ->with('success', 'Service deleted successfully.');
+        return redirect()->route('admin.layanan.index')
+            ->with('success', 'Layanan berhasil dihapus.');
     }
 }

@@ -15,20 +15,21 @@ class Service extends Model
         'name',
         'description',
         'price',
-        'duration',
+        'duration_minutes',
         'category',
-        'image',
+        'photo',
         'is_active',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
-        'duration' => 'integer',
+        'duration_minutes' => 'integer',
         'is_active' => 'boolean',
     ];
 
-    // Relationships
     /**
+     * Get bookings for the service
+     *
      * @return HasMany
      */
     public function bookings(): HasMany
@@ -37,15 +38,18 @@ class Service extends Model
     }
 
     /**
+     * Get galleries for the service
+     *
      * @return HasMany
      */
-    public function reviews(): HasMany
+    public function galleries(): HasMany
     {
-        return $this->hasMany(Review::class);
+        return $this->hasMany(Gallery::class);
     }
 
-    // Scopes
     /**
+     * Scope for active services
+     *
      * @param Builder $query
      * @return Builder
      */
@@ -55,6 +59,8 @@ class Service extends Model
     }
 
     /**
+     * Scope to filter services by category
+     *
      * @param Builder $query
      * @param string $category
      * @return Builder
@@ -62,16 +68,5 @@ class Service extends Model
     public function scopeByCategory(Builder $query, string $category): Builder
     {
         return $query->where('category', $category);
-    }
-
-    // Accessors
-    public function getAverageRatingAttribute()
-    {
-        return $this->reviews()->avg('rating') ?? 0;
-    }
-
-    public function getTotalReviewsAttribute()
-    {
-        return $this->reviews()->count();
     }
 }

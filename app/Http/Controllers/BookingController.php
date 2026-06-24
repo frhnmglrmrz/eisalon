@@ -4,38 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Service;
-use App\Models\Therapist;
+use App\Models\Stylist;
+use App\Models\Slot;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class BookingController extends Controller
 {
-    /**
-     * Display user's bookings
-     */
-    public function index()
-    {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $bookings = $user->bookings()
-            ->with(['service', 'therapist', 'payment'])
-            ->orderBy('booking_date', 'desc')
-            ->paginate(10);
-
-        return view('bookings.index', compact('bookings'));
-    }
-
     /**
      * Show the booking form
      */
     public function create(Request $request)
     {
-        $service = Service::findOrFail($request->service_id);
-        $therapists = Therapist::available()
-            ->bySpecialization($service->category)
-            ->get();
-
-        return view('bookings.create', compact('service', 'therapists'));
+        $services = Service::active()->get();
+        $selectedServiceId = $request->input('service_id');
+        
+        return view('bookings.create', compact('services', 'selectedServiceId'));
     }
 
     /**
@@ -43,184 +30,169 @@ class BookingController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        // 1. Validasi Input Dasar
+        $rules = [
             'service_id' => 'required|exists:services,id',
-            'therapist_id' => 'nullable|exists:therapists,id',
-            'booking_date' => 'required|date|after:now',
+            'date' => 'required|date|after_or_equal:today',
+            'slot_id' => 'required|exists:slots,id',
+            'stylist_id' => 'nullable|exists:stylists,id',
             'notes' => 'nullable|string|max:500',
-        ]);
+        ];
 
+        // Jika tidak masuk log (guest), wajib isi data kontak
+        if (!Auth::check()) {
+            $rules['guest_name'] = 'required|string|max:255';
+            $rules['guest_phone'] = 'required|string|max:20';
+            $rules['guest_email'] = 'required|email|max:255';
+        }
+
+        $validated = $request->validate($rules);
+
+        // 2. Dapatkan Objek Terkait
         $service = Service::findOrFail($validated['service_id']);
+        $slot = Slot::findOrFail($validated['slot_id']);
+        
+        // Pastikan tanggal slot cocok dengan input date
+        if ($slot->date->format('Y-m-d') !== $validated['date']) {
+            return back()->withErrors(['date' => 'Tanggal slot tidak cocok dengan tanggal yang dipilih.'])->withInput();
+        }
 
-        // Validasi ketersediaan terapis
-        if (isset($validated['therapist_id'])) {
-            $therapist = Therapist::findOrFail($validated['therapist_id']);
-            if (!$therapist->isAvailableAt($validated['booking_date'])) {
-                return back()->withErrors([
-                    'booking_date' => 'Therapist is not available at the selected time'
-                ])->withInput();
-            }
-        } else {
-            // Check if there is at least one therapist available for this service category at the selected time
-            $availableTherapistsCount = Therapist::available()
-                ->bySpecialization($service->category)
-                ->whereDoesntHave('bookings', function ($query) use ($validated) {
-                    $query->where('booking_date', $validated['booking_date'])
-                          ->whereIn('status', ['pending', 'confirmed', 'in_progress']);
+        // 3. Tentukan & Validasi Stylist
+        $assignedStylistId = null;
+
+        if ($request->filled('stylist_id')) {
+            $stylistId = $request->stylist_id;
+            $stylist = Stylist::available()
+                ->where(function($q) use ($service) {
+                    $q->where('specialization', 'like', '%' . $service->category . '%')
+                      ->orWhereNull('specialization')
+                      ->orWhere('specialization', '');
                 })
-                ->count();
+                ->where('id', $stylistId)
+                ->first();
 
-            if ($availableTherapistsCount === 0) {
-                return back()->withErrors([
-                    'booking_date' => 'No therapists specializing in this service category are available at the selected time'
-                ])->withInput();
+            if (!$stylist) {
+                return back()->withErrors(['stylist_id' => 'Stylist tersebut tidak tersedia untuk kategori layanan ini.'])->withInput();
+            }
+
+            // Cek ketersediaan slot untuk stylist ini
+            $isBooked = Booking::where('slot_id', $slot->id)
+                ->where('booking_date', $validated['date'])
+                ->where('stylist_id', $stylistId)
+                ->whereIn('status', ['pending', 'confirmed', 'completed'])
+                ->exists();
+
+            if ($isBooked) {
+                return back()->withErrors(['slot_id' => 'Stylist yang dipilih sudah memiliki jadwal lain di jam ini.'])->withInput();
+            }
+
+            $assignedStylistId = $stylistId;
+        } else {
+            // Cari stylist yang cocok dan tersedia
+            $availableStylist = Stylist::available()
+                ->where(function($q) use ($service) {
+                    $q->where('specialization', 'like', '%' . $service->category . '%')
+                      ->orWhereNull('specialization')
+                      ->orWhere('specialization', '');
+                })
+                ->whereDoesntHave('bookings', function($q) use ($slot, $validated) {
+                    $q->where('slot_id', $slot->id)
+                      ->where('booking_date', $validated['date'])
+                      ->whereIn('status', ['pending', 'confirmed', 'completed']);
+                })
+                ->first();
+
+            if (!$availableStylist) {
+                return back()->withErrors(['slot_id' => 'Semua stylist untuk kategori layanan ini sudah penuh pada slot jam terpilih.'])->withInput();
+            }
+
+            $assignedStylistId = $availableStylist->id;
+        }
+
+        // 4. Hubungkan ke User atau Buat User Baru untuk Guest
+        $user = null;
+        $tempPassword = null;
+
+        if (Auth::check()) {
+            $user = Auth::user();
+        } else {
+            $email = $validated['guest_email'];
+            $user = User::where('email', $email)->first();
+            
+            if (!$user) {
+                // Buat user baru otomatis
+                $tempPassword = Str::random(8);
+                $user = User::create([
+                    'name' => $validated['guest_name'],
+                    'email' => $email,
+                    'phone' => $validated['guest_phone'],
+                    'password' => Hash::make($tempPassword),
+                    'role' => 'customer',
+                ]);
             }
         }
 
-        // Create booking
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
+        // 5. Simpan Booking
         $booking = Booking::create([
             'user_id' => $user->id,
-            'service_id' => $validated['service_id'],
-            'therapist_id' => $validated['therapist_id'] ?? null,
-            'booking_date' => $validated['booking_date'],
+            'guest_name' => Auth::check() ? null : $validated['guest_name'],
+            'guest_phone' => Auth::check() ? null : $validated['guest_phone'],
+            'guest_email' => Auth::check() ? null : $validated['guest_email'],
+            'service_id' => $service->id,
+            'stylist_id' => $assignedStylistId,
+            'slot_id' => $slot->id,
+            'booking_date' => $validated['date'],
+            'booking_time' => $slot->start_time,
+            'status' => 'pending',
             'notes' => $validated['notes'] ?? null,
-            'total_price' => $service->price,
-            'status' => 'pending',
         ]);
 
-        // Create manual Payment record
-        $payment = \App\Models\Payment::create([
-            'booking_id' => $booking->id,
-            'xendit_invoice_id' => 'WA-' . $booking->id . '-' . time(), // Dummy ID for manual payment
-            'amount' => $booking->total_price,
-            'status' => 'pending',
-            'payment_method' => 'Manual Transfer',
-        ]);
-
-        // Construct WhatsApp Message
-        $admin = \App\Models\User::where('role', 'admin')->first();
-        $phoneNumber = $admin->phone ?? '089523808660'; // Admin Phone Number from DB with fallback
-        $message = "Halo Admin, saya ingin konfirmasi booking:\n\n" .
-                   "Booking ID: #{$booking->id}\n" .
-                   "Nama: {$user->name}\n" .
-                   "Service: {$service->name}\n" .
-                   "Tanggal: {$validated['booking_date']}\n" .
-                   "Total: Rp " . number_format($booking->total_price, 0, ',', '.') . "\n\n" .
-                   "Mohon info pembayaran selanjutnya. Terima kasih.";
-
-        $whatsappUrl = "https://wa.me/{$phoneNumber}?text=" . urlencode($message);
-
-        return redirect()->away($whatsappUrl);
-    }
-
-    /**
-     * Display the specified booking
-     */
-    public function show(Booking $booking)
-    {
-        // Ensure user can only view their own bookings
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        if ($booking->user_id !== $user->id) {
-            abort(403, 'Unauthorized access');
-        }
-
-        $booking->load(['service', 'therapist', 'payment', 'review']);
-
-        return view('bookings.show', compact('booking'));
-    }
-
-    /**
-     * Cancel a booking
-     */
-    public function cancel(Booking $booking)
-    {
-        // Ensure user can only cancel their own bookings
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        if ($booking->user_id !== $user->id) {
-            abort(403, 'Unauthorized access');
-        }
-
-        if (!$booking->canBeCancelled()) {
-            return back()->withErrors([
-                'booking' => 'This booking cannot be cancelled'
+        if ($tempPassword) {
+            session()->flash('new_user_created', [
+                'email' => $user->email,
+                'password' => $tempPassword
             ]);
         }
 
-        $booking->update(['status' => 'cancelled']);
-
-        return redirect()->route('bookings.index')
-            ->with('success', 'Booking cancelled successfully');
+        return redirect()->route('booking.success', $booking)
+            ->with('success', 'Reservasi berhasil dibuat! Silakan lakukan konfirmasi via WhatsApp.');
     }
 
     /**
-     * Payment success redirect
+     * Show success page and WhatsApp confirmation link
      */
-    public function paymentSuccess(Booking $booking)
+    public function success(Booking $booking)
     {
-        return redirect()->route('bookings.index')
-            ->with('success', 'Payment successful! Your booking for ' . $booking->service->name . ' is confirmed.');
-    }
-
-    /**
-     * Payment failed redirect
-     */
-    public function paymentFailed(Booking $booking)
-    {
-        return view('bookings.payment-failed', compact('booking'));
-    }
-
-    /**
-     * Get available time slots for a service and therapist
-     */
-    public function getAvailableSlots(Request $request)
-    {
-        $validated = $request->validate([
-            'service_id' => 'required|exists:services,id',
-            'therapist_id' => 'nullable|exists:therapists,id',
-            'date' => 'required|date',
-        ]);
-
-        $service = Service::findOrFail($validated['service_id']);
-        $date = $validated['date'];
-
-        // Business hours: 9 AM - 9 PM
-        $startHour = 9;
-        $endHour = 21;
-
-        $slots = [];
-
-        for ($hour = $startHour; $hour < $endHour; $hour++) {
-            $timeSlot = $date . ' ' . str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00:00';
-
-            // Check if slot is available
-            if (isset($validated['therapist_id'])) {
-                $isBooked = Booking::where('booking_date', $timeSlot)
-                    ->where('therapist_id', $validated['therapist_id'])
-                    ->whereIn('status', ['pending', 'confirmed', 'in_progress'])
-                    ->exists();
-            } else {
-                $availableTherapistsCount = Therapist::available()
-                    ->bySpecialization($service->category)
-                    ->whereDoesntHave('bookings', function ($query) use ($timeSlot) {
-                        $query->where('booking_date', $timeSlot)
-                              ->whereIn('status', ['pending', 'confirmed', 'in_progress']);
-                    })
-                    ->count();
-                
-                $isBooked = ($availableTherapistsCount === 0);
-            }
-
-            $slots[] = [
-                'time' => date('H:i', strtotime($timeSlot)),
-                'datetime' => $timeSlot,
-                'is_available' => !$isBooked,
-            ];
+        $booking->load(['service', 'stylist', 'slot']);
+        
+        // Cari admin untuk nomor telepon WhatsApp
+        $admin = User::where('role', 'admin')->first();
+        $adminPhone = $admin ? $admin->phone : '6289523808660';
+        
+        // Bersihkan format nomor telepon agar diawali kode negara
+        $adminPhone = preg_replace('/[^0-9]/', '', $adminPhone);
+        if (str_starts_with($adminPhone, '0')) {
+            $adminPhone = '62' . substr($adminPhone, 1);
         }
 
-        return response()->json($slots);
+        // Generate teks WhatsApp
+        $customerName = $booking->user ? $booking->user->name : ($booking->guest_name ?? 'Pelanggan');
+        $dateFormatted = \Carbon\Carbon::parse($booking->booking_date)->format('d F Y');
+        $timeFormatted = \Carbon\Carbon::parse($booking->booking_time)->format('H:i');
+        $stylistName = $booking->stylist ? $booking->stylist->name : 'Pilih Acak (Siapa Saja)';
+
+        $message = "Halo Admin Alan's Art Hair Salon,\n\n" .
+                   "Saya ingin mengonfirmasi pemesanan reservasi saya:\n" .
+                   "- **ID Booking**: #{$booking->id}\n" .
+                   "- **Nama**: {$customerName}\n" .
+                   "- **Layanan**: {$booking->service->name}\n" .
+                   "- **Stylist**: {$stylistName}\n" .
+                   "- **Jadwal**: {$dateFormatted} jam {$timeFormatted}\n" .
+                   "- **Total**: Rp " . number_format($booking->service->price, 0, ',', '.') . "\n\n" .
+                   "Mohon untuk mengonfirmasi jadwal pemesanan saya. Terima kasih!";
+
+        $whatsappUrl = "https://wa.me/{$adminPhone}?text=" . urlencode($message);
+
+        return view('bookings.success', compact('booking', 'whatsappUrl'));
     }
 }

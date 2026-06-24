@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Builder;
 
 class Booking extends Model
@@ -14,17 +13,22 @@ class Booking extends Model
 
     protected $fillable = [
         'user_id',
+        'guest_name',
+        'guest_phone',
+        'guest_email',
         'service_id',
-        'therapist_id',
+        'stylist_id',
+        'slot_id',
         'booking_date',
+        'booking_time',
         'status',
         'notes',
-        'total_price',
+        'whatsapp_sent_at',
     ];
 
     protected $casts = [
-        'booking_date' => 'datetime',
-        'total_price' => 'decimal:2',
+        'booking_date' => 'date',
+        'whatsapp_sent_at' => 'datetime',
     ];
 
     // Relationships
@@ -47,25 +51,17 @@ class Booking extends Model
     /**
      * @return BelongsTo
      */
-    public function therapist(): BelongsTo
+    public function stylist(): BelongsTo
     {
-        return $this->belongsTo(Therapist::class);
+        return $this->belongsTo(Stylist::class);
     }
 
     /**
-     * @return HasOne
+     * @return BelongsTo
      */
-    public function payment(): HasOne
+    public function slot(): BelongsTo
     {
-        return $this->hasOne(Payment::class);
-    }
-
-    /**
-     * @return HasOne
-     */
-    public function review(): HasOne
-    {
-        return $this->hasOne(Review::class);
+        return $this->belongsTo(Slot::class);
     }
 
     // Scopes
@@ -106,15 +102,18 @@ class Booking extends Model
                      ->whereIn('status', ['pending', 'confirmed']);
     }
 
-    // Methods
-    public function canBeCancelled()
+    /**
+     * Check if booking can be cancelled (only if pending/confirmed and > 24 hours prior)
+     *
+     * @return bool
+     */
+    public function canBeCancelled(): bool
     {
-        return in_array($this->status, ['pending', 'confirmed']) 
-            && $this->booking_date > now()->addHours(24);
-    }
+        if (!in_array($this->status, ['pending', 'confirmed'])) {
+            return false;
+        }
 
-    public function isPaid()
-    {
-        return $this->payment && $this->payment->status === 'paid';
+        $bookingDateTime = \Carbon\Carbon::parse($this->booking_date->format('Y-m-d') . ' ' . $this->booking_time);
+        return $bookingDateTime->isAfter(now()->addHours(24));
     }
 }

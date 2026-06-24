@@ -1,145 +1,93 @@
 @extends('layouts.app')
 
-@section('title', 'Welcome to Ei Salon - Beauty & Wellness')
+@section('title', "Alan's Art Hair Salon - Premium Haircuts & Styling")
 
 @section('content')
 <!-- Hero Section -->
-<section class="relative overflow-hidden bg-gradient-to-br from-pink-50 via-white to-orange-50 py-20 md:py-32">
-    <div class="container mx-auto px-6">
-        <div class="max-w-4xl mx-auto text-center animate-fadeIn">
-            <h1 class="text-5xl md:text-7xl font-bold gradient-text mb-6">
-                Welcome to Ei Salon
+<section class="relative overflow-hidden bg-gradient-to-br from-indigo-950 via-indigo-900 to-indigo-950 py-24 md:py-36 text-white">
+    <div class="container mx-auto px-6 text-center z-10 relative">
+        <div class="max-w-4xl mx-auto animate-fadeIn">
+            <span class="bg-indigo-800 text-indigo-200 px-4 py-2 rounded-full text-xs font-semibold tracking-wider uppercase mb-6 inline-block">UMKM Hair Salon Premium</span>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 tracking-tight leading-none text-white">
+                Alan's Art Hair Salon
             </h1>
-            <p class="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
-                Your premium destination for beauty and wellness. Experience luxury treatments 
-                and professional care that brings out your natural glow.
+            <p class="text-lg md:text-xl text-indigo-200 mb-10 max-w-2xl mx-auto font-light leading-relaxed">
+                Sentuhan seni profesional untuk rambut Anda. Kami menghadirkan potongan rambut tren masa kini, pewarnaan premium, dan perawatan rambut terbaik untuk menunjang penampilan Anda.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ route('services.index') }}" class="btn-primary text-white px-8 py-4 rounded-full font-medium text-lg">
-                    <i class="fas fa-spa mr-2"></i>Explore Services
+                <a href="{{ route('booking.create') }}" class="bg-white text-indigo-950 px-8 py-4 rounded-full font-bold text-lg hover:bg-indigo-50 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <i class="far fa-calendar-check mr-2"></i>Pesan Sekarang
                 </a>
-                <a href="{{ route('catalog.index') }}" class="bg-white border-2 border-pink-500 text-pink-500 px-8 py-4 rounded-full font-medium text-lg hover:bg-pink-50 transition">
-                    <i class="fas fa-book mr-2"></i>View Catalog
+                <a href="{{ route('catalog.index') }}" class="border border-indigo-300 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/10 transition">
+                    <i class="fas fa-cut mr-2"></i>Lihat Layanan
                 </a>
             </div>
         </div>
     </div>
     
-    <!-- Floating decorative elements -->
-    <div class="absolute top-20 left-10 w-20 h-20 bg-pink-300 rounded-full opacity-20 animate-float"></div>
-    <div class="absolute bottom-20 right-10 w-32 h-32 bg-orange-300 rounded-full opacity-20 animate-float" style="animation-delay: 1s;"></div>
-    <div class="absolute top-1/2 left-1/4 w-16 h-16 bg-pink-200 rounded-full opacity-30 animate-float" style="animation-delay: 2s;"></div>
+    <!-- Floating background elements -->
+    <div class="absolute top-20 left-10 w-24 h-24 bg-indigo-500 rounded-full opacity-10 animate-float"></div>
+    <div class="absolute bottom-20 right-10 w-36 h-36 bg-indigo-600 rounded-full opacity-10 animate-float" style="animation-delay: 1.5s;"></div>
 </section>
 
-<!-- Stats Section -->
-<section class="py-16 bg-white">
+<!-- About Section -->
+<section id="about" class="py-20 bg-white">
     <div class="container mx-auto px-6">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div class="animate-fadeIn">
-                <div class="text-4xl md:text-5xl font-bold gradient-text mb-2"><span id="stat-services">{{ $stats['total_services'] }}</span>+</div>
-                <p class="text-gray-600 font-medium">Services</p>
-            </div>
-            <div class="animate-fadeIn" style="animation-delay: 0.1s;">
-                <div class="text-4xl md:text-5xl font-bold gradient-text mb-2"><span id="stat-categories">{{ $stats['categories'] }}</span></div>
-                <p class="text-gray-600 font-medium">Categories</p>
-            </div>
-            <div class="animate-fadeIn" style="animation-delay: 0.2s;">
-                <div class="text-4xl md:text-5xl font-bold gradient-text mb-2"><span id="stat-rating">{{ number_format($stats['average_rating'], 1) }}</span></div>
-                <p class="text-gray-600 font-medium">Average Rating</p>
-            </div>
-            <div class="animate-fadeIn" style="animation-delay: 0.3s;">
-                <div class="text-4xl md:text-5xl font-bold gradient-text mb-2"><span id="stat-reviews">{{ $stats['total_reviews'] }}</span>+</div>
-                <p class="text-gray-600 font-medium">Happy Clients</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- About Us Section -->
-<section id="about" class="py-20 bg-gradient-to-br from-pink-50 via-white to-orange-50">
-    <div class="container mx-auto px-6">
-        <div class="max-w-6xl mx-auto">
-            <div class="text-center mb-16 animate-fadeIn">
-                <h2 class="text-4xl md:text-5xl font-bold gradient-text mb-4">About Ei Salon</h2>
-                <div class="w-24 h-1 bg-gradient-to-r from-pink-500 to-orange-500 mx-auto mb-6"></div>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    We are dedicated to providing exceptional beauty and wellness services 
-                    that help you look and feel your best.
-                </p>
-            </div>
-            
-            <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div class="animate-slideInLeft">
-                    <div class="relative">
-                        <div class="absolute inset-0 bg-gradient-to-br from-pink-400 to-orange-400 rounded-3xl transform rotate-3"></div>
-                        <div class="relative bg-white rounded-3xl p-8 shadow-2xl">
-                            <h3 class="text-3xl font-bold text-gray-800 mb-4">Our Story</h3>
-                            <p class="text-gray-600 mb-4 leading-relaxed">
-                                Ei Salon was founded with a vision to create a sanctuary where beauty meets wellness. 
-                                We believe that everyone deserves to feel confident and radiant in their own skin.
-                            </p>
-                            <p class="text-gray-600 mb-4 leading-relaxed">
-                                With years of experience and a passion for excellence, our team of certified therapists 
-                                is committed to delivering personalized treatments that exceed expectations.
-                            </p>
-                            <div class="flex items-center gap-4 mt-6">
-                                <div class="flex items-center">
-                                    <i class="fas fa-check-circle text-green-500 text-xl mr-2"></i>
-                                    <span class="text-gray-700 font-medium">Certified Therapists</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <i class="fas fa-check-circle text-green-500 text-xl mr-2"></i>
-                                    <span class="text-gray-700 font-medium">Premium Products</span>
-                                </div>
-                            </div>
+        <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+            <div class="relative animate-fadeIn">
+                <div class="absolute inset-0 bg-indigo-900 rounded-3xl transform rotate-3 scale-95 opacity-5"></div>
+                <div class="relative bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-3xl p-8 shadow-sm border border-indigo-100">
+                    <h3 class="text-3xl font-bold text-indigo-950 mb-4">Profil Salon Kami</h3>
+                    <p class="text-gray-700 mb-4 leading-relaxed font-light">
+                        Di **Alan's Art Hair Salon**, kami percaya bahwa rambut adalah mahkota Anda. Setiap helai rambut yang kami sentuh adalah wujud dari seni potongan, detail pewarnaan, dan perawatan berkualitas tinggi.
+                    </p>
+                    <p class="text-gray-700 leading-relaxed font-light">
+                        Dipimpin oleh stylist berpengalaman dan didukung produk premium, kami menjamin setiap kunjungan Anda mendatangkan kepuasan maksimal dan rasa percaya diri baru.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 mt-8">
+                        <div class="flex items-center text-indigo-900">
+                            <i class="fas fa-check-circle text-indigo-600 mr-2"></i>
+                            <span class="font-medium text-sm">Stylist Berbakat</span>
+                        </div>
+                        <div class="flex items-center text-indigo-900">
+                            <i class="fas fa-check-circle text-indigo-600 mr-2"></i>
+                            <span class="font-medium text-sm">Produk Premium</span>
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            <div class="space-y-6">
+                <h2 class="text-4xl font-bold text-indigo-950">Mengapa Memilih Kami?</h2>
+                <div class="w-16 h-1 bg-indigo-900 rounded"></div>
                 
-                <div class="animate-slideInRight space-y-6">
-                    <div class="glass-effect rounded-2xl p-6 card-hover">
-                        <div class="flex items-start">
-                            <div class="w-14 h-14 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                                <i class="fas fa-heart text-white text-xl"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-xl font-bold text-gray-800 mb-2">Our Mission</h4>
-                                <p class="text-gray-600">
-                                    To provide exceptional beauty and wellness services that enhance your natural beauty 
-                                    and promote overall well-being.
-                                </p>
-                            </div>
-                        </div>
+                <div class="flex gap-4">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-900 shrink-0 shadow-sm border border-indigo-100">
+                        <i class="fas fa-magic"></i>
                     </div>
-                    
-                    <div class="glass-effect rounded-2xl p-6 card-hover">
-                        <div class="flex items-start">
-                            <div class="w-14 h-14 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                                <i class="fas fa-eye text-white text-xl"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-xl font-bold text-gray-800 mb-2">Our Vision</h4>
-                                <p class="text-gray-600">
-                                    To be the leading beauty and wellness destination known for innovation, 
-                                    quality, and exceptional customer care.
-                                </p>
-                            </div>
-                        </div>
+                    <div>
+                        <h4 class="text-lg font-bold text-indigo-950 mb-1">Hasil Stylist Profesional</h4>
+                        <p class="text-sm text-gray-600 font-light">Setiap stylist kami memiliki kualifikasi tinggi di bidang pemotongan pria, wanita, pewarnaan, dan hair care.</p>
                     </div>
-                    
-                    <div class="glass-effect rounded-2xl p-6 card-hover">
-                        <div class="flex items-start">
-                            <div class="w-14 h-14 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                                <i class="fas fa-gem text-white text-xl"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-xl font-bold text-gray-800 mb-2">Our Values</h4>
-                                <p class="text-gray-600">
-                                    Excellence, integrity, and personalized care are at the heart of everything we do. 
-                                    Your satisfaction is our priority.
-                                </p>
-                            </div>
-                        </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-900 shrink-0 shadow-sm border border-indigo-100">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold text-indigo-950 mb-1">Reservasi Online Praktis</h4>
+                        <p class="text-sm text-gray-600 font-light">Pilih layanan, stylist favorit, tanggal, dan jam kosong secara instan tanpa perlu antre di tempat.</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-900 shrink-0 shadow-sm border border-indigo-100">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold text-indigo-950 mb-1">Konfirmasi WhatsApp Cepat</h4>
+                        <p class="text-sm text-gray-600 font-light">Selesai booking, format rincian pemesanan disiapkan otomatis untuk dikirim ke WhatsApp Admin sebagai validasi cepat.</p>
                     </div>
                 </div>
             </div>
@@ -148,76 +96,59 @@
 </section>
 
 <!-- Featured Services Section -->
-<section id="services" class="py-20 bg-white">
+<section class="py-20 bg-gray-50 border-t border-b border-gray-200/50">
     <div class="container mx-auto px-6">
-        <div class="text-center mb-16 animate-fadeIn">
-            <h2 class="text-4xl md:text-5xl font-bold gradient-text mb-4">Our Featured Services</h2>
-            <div class="w-24 h-1 bg-gradient-to-r from-pink-500 to-orange-500 mx-auto mb-6"></div>
-            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                Discover our most popular treatments designed to rejuvenate and pamper you
-            </p>
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-indigo-950 mb-4">Layanan Unggulan Kami</h2>
+            <div class="w-20 h-1 bg-indigo-900 mx-auto rounded"></div>
+            <p class="text-gray-600 mt-4 font-light max-w-xl mx-auto">Jelajahi berbagai perawatan rambut terbaik yang kami sediakan untuk Anda.</p>
         </div>
         
         @if($featuredServices->count() > 0)
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
                 @foreach($featuredServices as $index => $service)
-                    <div class="glass-effect rounded-2xl overflow-hidden shadow-lg card-hover animate-fadeIn" style="animation-delay: {{ $index * 0.1 }}s;">
-                        <!-- Service Image -->
-                        <div class="relative h-64 bg-gradient-to-br from-pink-400 to-orange-400 overflow-hidden">
-                            @if($service->image)
-                                <img src="{{ asset('storage/' . $service->image) }}" alt="{{ $service->name }}" class="w-full h-full object-cover">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center">
-                                    <i class="fas fa-spa text-white text-6xl opacity-50"></i>
+                    <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition border border-gray-200/60 flex flex-col justify-between">
+                        <div>
+                            <!-- Service Photo -->
+                            <div class="relative h-56 bg-indigo-950 overflow-hidden">
+                                @if($service->photo)
+                                    <img src="{{ asset('storage/' . $service->photo) }}" alt="{{ $service->name }}" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-900 to-indigo-950">
+                                        <i class="fas fa-cut text-white text-5xl opacity-40"></i>
+                                    </div>
+                                @endif
+                                <div class="absolute top-4 left-4">
+                                    <span class="bg-white/95 text-indigo-950 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
+                                        {{ $service->category }}
+                                    </span>
                                 </div>
-                            @endif
+                            </div>
                             
-                            <!-- Category Badge -->
-                            <div class="absolute top-4 left-4">
-                                <span class="glass-effect px-4 py-2 rounded-full text-sm font-medium text-gray-800">
-                                    {{ ucwords(str_replace('_', ' ', $service->category)) }}
+                            <!-- Info -->
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-indigo-950 mb-2">{{ $service->name }}</h3>
+                                <p class="text-sm text-gray-500 font-light line-clamp-3 mb-4">{{ $service->description }}</p>
+                            </div>
+                        </div>
+
+                        <div class="p-6 pt-0">
+                            <div class="flex items-center justify-between border-t border-gray-100 pt-4 mb-4">
+                                <span class="text-lg font-bold text-indigo-900">
+                                    Rp {{ number_format($service->price, 0, ',', '.') }}
+                                </span>
+                                <span class="text-xs text-gray-500">
+                                    <i class="far fa-clock mr-1"></i> {{ $service->duration_minutes }} Menit
                                 </span>
                             </div>
                             
-                            <!-- Rating -->
-                            @if($service->total_reviews > 0)
-                                <div class="absolute top-4 right-4 glass-effect px-3 py-2 rounded-full">
-                                    <i class="fas fa-star text-yellow-500 mr-1"></i>
-                                    <span class="font-bold">{{ number_format($service->average_rating, 1) }}</span>
-                                </div>
-                            @endif
-                        </div>
-                        
-                        <!-- Service Info -->
-                        <div class="p-6">
-                            <h3 class="text-2xl font-bold text-gray-800 mb-2">{{ $service->name }}</h3>
-                            <p class="text-gray-600 mb-4 line-clamp-2">{{ Str::limit($service->description, 100) }}</p>
-                            
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <span class="text-3xl font-bold gradient-text">
-                                        Rp {{ number_format($service->price, 0, ',', '.') }}
-                                    </span>
-                                </div>
-                                <div class="text-gray-500">
-                                    <i class="far fa-clock mr-1"></i>
-                                    {{ $service->duration }} min
-                                </div>
-                            </div>
-                            
                             <div class="flex gap-2">
-                                <a href="{{ route('services.show', $service) }}" class="flex-1 text-center bg-white border-2 border-pink-500 text-pink-500 px-4 py-3 rounded-full font-medium hover:bg-pink-50 transition">
-                                    Details
+                                <a href="{{ route('catalog.show', $service) }}" class="flex-1 text-center border border-gray-300 text-gray-700 px-4 py-2.5 rounded-full text-sm font-medium hover:bg-gray-50 transition">
+                                    Detail
                                 </a>
-                                @auth
-                                    <a href="{{ route('bookings.create', ['service_id' => $service->id]) }}" class="flex-1 text-center btn-primary text-white px-4 py-3 rounded-full font-medium">
-                                        Book Now
-                                    </a>
-                                @else
-                                    <a href="{{ route('login') }}" class="flex-1 text-center btn-primary text-white px-4 py-3 rounded-full font-medium">
-                                        Book Now
-                                    </a>
-                                @endauth
+                                <a href="{{ route('booking.create', ['service_id' => $service->id]) }}" class="flex-1 text-center bg-indigo-900 text-white px-4 py-2.5 rounded-full text-sm font-medium hover:bg-indigo-950 transition">
+                                    Pesan
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -225,222 +156,89 @@
             </div>
             
             <div class="text-center">
-                <a href="{{ route('services.index') }}" class="inline-block bg-white border-2 border-pink-500 text-pink-500 px-8 py-4 rounded-full font-medium text-lg hover:bg-pink-50 transition">
-                    View All Services <i class="fas fa-arrow-right ml-2"></i>
+                <a href="{{ route('catalog.index') }}" class="inline-block bg-white border border-gray-300 text-gray-700 px-8 py-3.5 rounded-full font-semibold hover:bg-gray-50 transition shadow-sm">
+                    Lihat Semua Layanan <i class="fas fa-arrow-right ml-2 text-indigo-600"></i>
                 </a>
             </div>
         @else
             <div class="text-center py-12">
-                <i class="fas fa-spa text-6xl text-gray-300 mb-4"></i>
-                <p class="text-gray-500 text-lg">Services coming soon...</p>
+                <i class="fas fa-cut text-5xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500">Layanan belum tersedia.</p>
             </div>
         @endif
     </div>
 </section>
 
-<!-- Features/Benefits Section -->
-<section class="py-20 bg-gradient-to-br from-pink-50 via-white to-orange-50">
+<!-- Gallery Section -->
+@if(isset($latestGalleries) && $latestGalleries->count() > 0)
+<section class="py-20 bg-white">
     <div class="container mx-auto px-6">
-        <div class="text-center mb-16 animate-fadeIn">
-            <h2 class="text-4xl md:text-5xl font-bold gradient-text mb-4">Why Choose Ei Salon?</h2>
-            <div class="w-24 h-1 bg-gradient-to-r from-pink-500 to-orange-500 mx-auto mb-6"></div>
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-indigo-950 mb-4">Galeri Portofolio</h2>
+            <div class="w-20 h-1 bg-indigo-900 mx-auto rounded"></div>
+            <p class="text-gray-600 mt-4 font-light max-w-xl mx-auto">Inspirasi model rambut dan pengerjaan seni terbaik di salon kami.</p>
         </div>
         
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="glass-effect rounded-2xl p-8 text-center card-hover animate-fadeIn">
-                <div class="w-20 h-20 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-user-md text-white text-3xl"></i>
-                </div>
-                <h4 class="text-xl font-bold text-gray-800 mb-3">Professional Team</h4>
-                <p class="text-gray-600">
-                    Our certified and experienced therapists are dedicated to providing you with the best care.
-                </p>
-            </div>
-            
-            <div class="glass-effect rounded-2xl p-8 text-center card-hover animate-fadeIn" style="animation-delay: 0.1s;">
-                <div class="w-20 h-20 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-shield-alt text-white text-3xl"></i>
-                </div>
-                <h4 class="text-xl font-bold text-gray-800 mb-3">Safe & Hygienic</h4>
-                <p class="text-gray-600">
-                    We maintain the highest standards of hygiene with sterilized tools and sanitized equipment.
-                </p>
-            </div>
-            
-            <div class="glass-effect rounded-2xl p-8 text-center card-hover animate-fadeIn" style="animation-delay: 0.2s;">
-                <div class="w-20 h-20 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-leaf text-white text-3xl"></i>
-                </div>
-                <h4 class="text-xl font-bold text-gray-800 mb-3">Natural Products</h4>
-                <p class="text-gray-600">
-                    We use premium organic ingredients that are gentle on your skin and hair.
-                </p>
-            </div>
-            
-            <div class="glass-effect rounded-2xl p-8 text-center card-hover animate-fadeIn" style="animation-delay: 0.3s;">
-                <div class="w-20 h-20 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-clock text-white text-3xl"></i>
-                </div>
-                <h4 class="text-xl font-bold text-gray-800 mb-3">Flexible Booking</h4>
-                <p class="text-gray-600">
-                    Book your appointments online at your convenience. Easy scheduling and reminders.
-                </p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Testimonials Section -->
-@if($testimonials->count() > 0)
-<section id="testimonials" class="py-20 bg-white">
-    <div class="container mx-auto px-6">
-        <div class="text-center mb-16 animate-fadeIn">
-            <h2 class="text-4xl md:text-5xl font-bold gradient-text mb-4">What Our Clients Say</h2>
-            <div class="w-24 h-1 bg-gradient-to-r from-pink-500 to-orange-500 mx-auto mb-6"></div>
-            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                Read what our satisfied customers have to say about their experience
-            </p>
-        </div>
-        
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            @foreach($testimonials as $index => $review)
-                <div class="glass-effect rounded-2xl p-8 card-hover animate-fadeIn" style="animation-delay: {{ $index * 0.1 }}s;">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                            {{ strtoupper(substr($review->user->name, 0, 1)) }}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-6xl mx-auto mb-12">
+            @foreach($latestGalleries as $gallery)
+                <div class="group relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-sm border border-gray-100">
+                    <img src="{{ asset('storage/' . $gallery->photo) }}" alt="{{ $gallery->caption ?? 'Portofolio' }}" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
+                    @if($gallery->caption || $gallery->service)
+                        <div class="absolute inset-0 bg-gradient-to-t from-indigo-950/80 via-indigo-950/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 p-4 flex flex-col justify-end text-white">
+                            @if($gallery->service)
+                                <span class="text-xs uppercase text-indigo-300 font-semibold tracking-wider mb-1">{{ $gallery->service->name }}</span>
+                            @endif
+                            <p class="text-sm font-medium line-clamp-2">{{ $gallery->caption }}</p>
                         </div>
-                        <div>
-                            <h5 class="font-bold text-gray-800">{{ $review->user->name }}</h5>
-                            <p class="text-sm text-gray-500">{{ $review->service->name }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex mb-4">
-                        @for($i = 1; $i <= 5; $i++)
-                            <i class="fas fa-star {{ $i <= $review->rating ? 'text-yellow-500' : 'text-gray-300' }}"></i>
-                        @endfor
-                    </div>
-                    
-                    <p class="text-gray-600 italic">
-                        "{{ Str::limit($review->comment ?? 'Great service!', 150) }}"
-                    </p>
-                    
-                    <p class="text-sm text-gray-400 mt-4">
-                        {{ $review->created_at->diffForHumans() }}
-                    </p>
+                    @endif
                 </div>
             @endforeach
+        </div>
+        
+        <div class="text-center">
+            <a href="{{ route('gallery.index') }}" class="inline-block bg-white border border-gray-300 text-gray-700 px-8 py-3.5 rounded-full font-semibold hover:bg-gray-50 transition shadow-sm">
+                Buka Galeri Foto <i class="fas fa-images ml-2 text-indigo-600"></i>
+            </a>
         </div>
     </div>
 </section>
 @endif
 
-<!-- Contact Section -->
-<section id="contact" class="py-20 bg-gradient-to-br from-pink-50 via-white to-orange-50">
+<!-- Info & Hours Section -->
+<section id="contact" class="py-20 bg-gradient-to-br from-indigo-50 via-white to-indigo-100 border-t border-gray-200/50">
     <div class="container mx-auto px-6">
         <div class="max-w-4xl mx-auto">
-            <div class="text-center mb-16 animate-fadeIn">
-                <h2 class="text-4xl md:text-5xl font-bold gradient-text mb-4">Get In Touch</h2>
-                <div class="w-24 h-1 bg-gradient-to-r from-pink-500 to-orange-500 mx-auto mb-6"></div>
-                <p class="text-xl text-gray-600">
-                    Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
-                </p>
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-indigo-950 mb-4">Informasi Salon</h2>
+                <div class="w-20 h-1 bg-indigo-900 mx-auto rounded"></div>
             </div>
             
-            <div class="grid md:grid-cols-3 gap-8 mb-12">
-                <div class="glass-effect rounded-2xl p-6 text-center card-hover animate-fadeIn">
-                    <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-phone text-white text-xl"></i>
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- Kontak -->
+                <div class="bg-white rounded-3xl p-8 shadow-sm border border-indigo-100/50 flex items-start gap-4">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-900 shrink-0">
+                        <i class="fas fa-map-marker-alt text-xl"></i>
                     </div>
-                    <h4 class="font-bold text-gray-800 mb-2">Phone</h4>
-                    <p class="text-gray-600">+62 xxx xxxx xxxx</p>
+                    <div>
+                        <h4 class="text-lg font-bold text-indigo-950 mb-1">Lokasi Kami</h4>
+                        <p class="text-sm text-gray-600 font-light">Batam, Indonesia</p>
+                        <p class="text-xs text-gray-500 mt-2">Dapatkan gaya rambut impian Anda dengan mengunjungi lokasi fisik kami yang nyaman.</p>
+                    </div>
                 </div>
-                
-                <div class="glass-effect rounded-2xl p-6 text-center card-hover animate-fadeIn" style="animation-delay: 0.1s;">
-                    <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-envelope text-white text-xl"></i>
+
+                <!-- Jam Operasional -->
+                <div class="bg-white rounded-3xl p-8 shadow-sm border border-indigo-100/50 flex items-start gap-4">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-900 shrink-0">
+                        <i class="far fa-clock text-xl"></i>
                     </div>
-                    <h4 class="font-bold text-gray-800 mb-2">Email</h4>
-                    <p class="text-gray-600">info@eisalon.com</p>
-                </div>
-                
-                <div class="glass-effect rounded-2xl p-6 text-center card-hover animate-fadeIn" style="animation-delay: 0.2s;">
-                    <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-map-marker-alt text-white text-xl"></i>
-                    </div>
-                    <h4 class="font-bold text-gray-800 mb-2">Location</h4>
-                    <p class="text-gray-600">Jakarta, Indonesia</p>
-                </div>
-            </div>
-            
-            <div class="glass-effect rounded-2xl p-8 animate-fadeIn">
-                <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Business Hours</h3>
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="flex justify-between items-center p-4 bg-white rounded-lg">
-                        <span class="font-medium text-gray-700">Monday - Friday</span>
-                        <span class="text-gray-600">9:00 AM - 9:00 PM</span>
-                    </div>
-                    <div class="flex justify-between items-center p-4 bg-white rounded-lg">
-                        <span class="font-medium text-gray-700">Saturday - Sunday</span>
-                        <span class="text-gray-600">10:00 AM - 8:00 PM</span>
+                    <div>
+                        <h4 class="text-lg font-bold text-indigo-950 mb-1">Jam Kerja</h4>
+                        <p class="text-sm text-gray-600 font-light">Senin - Minggu: 09:00 - 17:00</p>
+                        <p class="text-xs text-gray-500 mt-2">Reservasi online dapat dilakukan kapan saja. Slot janji temu tersedia dalam batas jam tersebut.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
-
-@push('styles')
-<style>
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-    .stat-update {
-        animation: pulse-green 1s;
-    }
-    @keyframes pulse-green {
-        0% { color: #10B981; transform: scale(1.1); }
-        100% { color: inherit; transform: scale(1); }
-    }
-</style>
-@endpush
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Real-time polling for home stats
-        setInterval(() => {
-            fetch('{{ route('home.api-stats') }}')
-                .then(response => response.json())
-                .then(data => {
-                    const stats = data.stats;
-                    
-                    const updateStat = (id, newValue) => {
-                        const el = document.getElementById(id);
-                        if (el && el.innerText != newValue) {
-                            el.innerText = newValue;
-                            el.classList.remove('stat-update');
-                            void el.offsetWidth; // trigger reflow
-                            el.classList.add('stat-update');
-                        }
-                    };
-
-                    updateStat('stat-services', stats.total_services);
-                    updateStat('stat-categories', stats.categories);
-                    
-                    // Format rating to 1 decimal place
-                    const formattedRating = parseFloat(stats.average_rating).toFixed(1);
-                    updateStat('stat-rating', formattedRating);
-                    
-                    updateStat('stat-reviews', stats.total_reviews);
-                })
-                .catch(err => console.error('Error fetching stats:', err));
-        }, 5000); // Poll every 5 seconds
-    });
-</script>
-@endpush
 @endsection
-

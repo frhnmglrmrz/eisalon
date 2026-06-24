@@ -3,8 +3,12 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\User;
 use App\Models\Service;
-use App\Models\Therapist;
+use App\Models\Stylist;
+use App\Models\Slot;
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,176 +17,63 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create demo users first
-        $this->call(UserSeeder::class);
-        
-        // Create sample therapists
-        $therapists = [
-            [
-                'name' => 'Sarah Johnson',
-                'specialization' => 'facial',
-                'bio' => 'Expert in facial treatments with 10 years of experience',
-                'is_available' => true,
-            ],
-            [
-                'name' => 'Maria Garcia',
-                'specialization' => 'massage',
-                'bio' => 'Professional massage therapist specializing in aromatherapy',
-                'is_available' => true,
-            ],
-            [
-                'name' => 'Jennifer Lee',
-                'specialization' => 'hair_treatment',
-                'bio' => 'Hair care specialist with expertise in scalp treatments',
-                'is_available' => true,
-            ],
-            [
-                'name' => 'Amanda Chen',
-                'specialization' => 'body_treatment',
-                'bio' => 'Body treatment expert focusing on skin rejuvenation',
-                'is_available' => true,
-            ],
-            [
-                'name' => 'Lisa Anderson',
-                'specialization' => 'nail_care',
-                'bio' => 'Certified nail technician with artistic flair',
-                'is_available' => true,
-            ],
-        ];
+        // 1. Buat User Admin & Customer
+        User::create([
+            'name' => 'Admin Alan',
+            'email' => 'admin@alansalon.com',
+            'password' => Hash::make('password'),
+            'role' => 'admin',
+            'phone' => '089523808660',
+        ]);
 
-        foreach ($therapists as $therapist) {
-            Therapist::create($therapist);
-        }
+        User::create([
+            'name' => 'Eka Putri',
+            'email' => 'pelanggan@alansalon.com',
+            'password' => Hash::make('password'),
+            'role' => 'customer',
+            'phone' => '081234567890',
+        ]);
 
-        // Create sample services
+        // 2. Buat 5 Layanan
         $services = [
-            // Facial Services
             [
-                'name' => 'Deep Cleansing Facial',
-                'description' => 'A thorough facial treatment that cleanses, exfoliates, and hydrates your skin. Perfect for removing impurities and giving your skin a fresh, radiant glow.',
-                'price' => 350000,
-                'duration' => 60,
-                'category' => 'facial',
+                'name' => 'Potong Rambut Pria',
+                'category' => 'Potong',
+                'description' => 'Potong rambut pria modis sudah termasuk cuci dan styling pomade.',
+                'price' => 50000.00,
+                'duration_minutes' => 30,
                 'is_active' => true,
             ],
             [
-                'name' => 'Anti-Aging Facial',
-                'description' => 'Premium anti-aging treatment with collagen infusion and specialized serum to reduce fine lines and wrinkles. Restore your youthful appearance.',
-                'price' => 550000,
-                'duration' => 90,
-                'category' => 'facial',
+                'name' => 'Potong Rambut Wanita',
+                'category' => 'Potong',
+                'description' => 'Potong rambut wanita sesuai bentuk wajah, cuci rambut, dan blow dry.',
+                'price' => 80000.00,
+                'duration_minutes' => 45,
                 'is_active' => true,
             ],
             [
-                'name' => 'Acne Treatment Facial',
-                'description' => 'Specialized treatment for acne-prone skin using medical-grade products. Includes extraction and healing mask.',
-                'price' => 400000,
-                'duration' => 75,
-                'category' => 'facial',
-                'is_active' => true,
-            ],
-            
-            // Massage Services
-            [
-                'name' => 'Swedish Massage',
-                'description' => 'Relaxing full-body massage using gentle, flowing strokes to release tension and improve circulation. Perfect for stress relief.',
-                'price' => 450000,
-                'duration' => 90,
-                'category' => 'massage',
+                'name' => 'Pewarnaan Rambut',
+                'category' => 'Pewarnaan',
+                'description' => 'Pewarnaan rambut penuh menggunakan produk premium dengan pilihan warna trendi.',
+                'price' => 250000.00,
+                'duration_minutes' => 120,
                 'is_active' => true,
             ],
             [
-                'name' => 'Deep Tissue Massage',
-                'description' => 'Intensive massage therapy targeting deep muscle layers to relieve chronic pain and tension. Ideal for athletes and active individuals.',
-                'price' => 500000,
-                'duration' => 90,
-                'category' => 'massage',
+                'name' => 'Hair Treatment (Creambath)',
+                'category' => 'Treatment',
+                'description' => 'Perawatan creambath tradisional dengan pijatan relaksasi untuk kesehatan kulit kepala.',
+                'price' => 120000.00,
+                'duration_minutes' => 60,
                 'is_active' => true,
             ],
             [
-                'name' => 'Hot Stone Massage',
-                'description' => 'Luxurious massage using heated stones to melt away tension and promote deep relaxation. An ultimate spa experience.',
-                'price' => 600000,
-                'duration' => 120,
-                'category' => 'massage',
-                'is_active' => true,
-            ],
-            
-            // Hair Treatment Services
-            [
-                'name' => 'Hair Spa Treatment',
-                'description' => 'Complete hair and scalp treatment including deep conditioning, steam, and scalp massage. Restores shine and vitality.',
-                'price' => 300000,
-                'duration' => 60,
-                'category' => 'hair_treatment',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Keratin Treatment',
-                'description' => 'Professional keratin treatment to smooth frizzy hair and add incredible shine. Results last up to 3 months.',
-                'price' => 800000,
-                'duration' => 180,
-                'category' => 'hair_treatment',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Scalp Detox Treatment',
-                'description' => 'Purifying scalp treatment that removes buildup and promotes healthy hair growth. Includes relaxing head massage.',
-                'price' => 350000,
-                'duration' => 60,
-                'category' => 'hair_treatment',
-                'is_active' => true,
-            ],
-            
-            // Body Treatment Services
-            [
-                'name' => 'Body Scrub & Wrap',
-                'description' => 'Exfoliating body scrub followed by nourishing wrap treatment. Leaves skin silky smooth and deeply hydrated.',
-                'price' => 500000,
-                'duration' => 90,
-                'category' => 'body_treatment',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Slimming Treatment',
-                'description' => 'Targeted treatment to help reduce cellulite and contour your body. Combines massage and specialized products.',
-                'price' => 650000,
-                'duration' => 90,
-                'category' => 'body_treatment',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Whitening Body Treatment',
-                'description' => 'Brightening treatment for even skin tone and radiant complexion. Uses natural ingredients for safe results.',
-                'price' => 550000,
-                'duration' => 75,
-                'category' => 'body_treatment',
-                'is_active' => true,
-            ],
-            
-            // Nail Care Services
-            [
-                'name' => 'Manicure & Pedicure',
-                'description' => 'Complete nail care including shaping, cuticle treatment, massage, and polish. Pamper your hands and feet.',
-                'price' => 200000,
-                'duration' => 60,
-                'category' => 'nail_care',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Gel Manicure',
-                'description' => 'Long-lasting gel nail polish that stays perfect for weeks. Choose from hundreds of colors.',
-                'price' => 250000,
-                'duration' => 45,
-                'category' => 'nail_care',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Nail Art Design',
-                'description' => 'Creative nail art service with custom designs. Express your personality through beautiful nail art.',
-                'price' => 350000,
-                'duration' => 90,
-                'category' => 'nail_care',
+                'name' => 'Hair Styling & Blow',
+                'category' => 'Styling',
+                'description' => 'Catok, keriting, atau blow rambut untuk menghadiri acara formal.',
+                'price' => 75000.00,
+                'duration_minutes' => 45,
                 'is_active' => true,
             ],
         ];
@@ -191,8 +82,53 @@ class DatabaseSeeder extends Seeder
             Service::create($service);
         }
 
-        $this->command->info('✅ Sample data seeded successfully!');
-        $this->command->info('📊 Created ' . count($therapists) . ' therapists');
-        $this->command->info('💆 Created ' . count($services) . ' services');
+        // 3. Buat 3 Stylists
+        $stylists = [
+            [
+                'name' => 'Andi',
+                'specialization' => 'Potong Pria & Styling',
+                'bio' => 'Spesialis potongan rambut pria undercut/fade dan penataan rambut modern.',
+                'is_available' => true,
+            ],
+            [
+                'name' => 'Budi',
+                'specialization' => 'Pewarnaan & Treatment',
+                'bio' => 'Ahli dalam teknik bleaching, balayage, pewarnaan rambut, dan perawatan creambath.',
+                'is_available' => true,
+            ],
+            [
+                'name' => 'Cici',
+                'specialization' => 'Potong Wanita & Styling',
+                'bio' => 'Pakar potongan rambut wanita bob/layer dan blow rambut bervolume.',
+                'is_available' => true,
+            ],
+        ];
+
+        foreach ($stylists as $stylist) {
+            Stylist::create($stylist);
+        }
+
+        // 4. Buat Slot Jadwal untuk 7 Hari ke Depan
+        $hours = [
+            ['09:00:00', '10:00:00'],
+            ['10:00:00', '11:00:00'],
+            ['11:00:00', '12:00:00'],
+            ['13:00:00', '14:00:00'],
+            ['14:00:00', '15:00:00'],
+            ['15:00:00', '16:00:00'],
+            ['16:00:00', '17:00:00'],
+        ];
+
+        for ($i = 0; $i < 7; $i++) {
+            $date = Carbon::today()->addDays($i)->format('Y-m-d');
+            foreach ($hours as $hour) {
+                Slot::create([
+                    'date' => $date,
+                    'start_time' => $hour[0],
+                    'end_time' => $hour[1],
+                    'is_available' => true,
+                ]);
+            }
+        }
     }
 }
