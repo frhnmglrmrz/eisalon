@@ -13,10 +13,6 @@
             <p class="text-gray-600 mt-1">Ubah status, pantau detail, dan kirim notifikasi pelanggan</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            <a href="{{ route('admin.bookings.whatsapp', $booking) }}" target="_blank" 
-               class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-full font-semibold shadow-md transition inline-flex items-center">
-                <i class="fab fa-whatsapp mr-2 text-lg"></i>Kirim Notifikasi WA
-            </a>
             <a href="{{ route('admin.bookings.index') }}" class="bg-gray-200 text-gray-700 hover:bg-gray-300 px-6 py-3 rounded-full font-semibold transition">
                 Kembali
             </a>

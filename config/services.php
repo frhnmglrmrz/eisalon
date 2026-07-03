@@ -45,4 +45,8 @@ return [
         'phone_number' => env('WHATSAPP_PHONE_NUMBER', '6281234567890'), // Format: 6281234567890 (tanpa +)
     ],
 
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN', 'BzRjogWdCtZhCJzmAWCK'),
+    ],
+
 ];

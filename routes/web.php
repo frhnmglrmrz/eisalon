@@ -58,7 +58,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/reservasi', [AdminBookingController::class, 'index'])->name('bookings.index');
     Route::get('/reservasi/{booking}', [AdminBookingController::class, 'show'])->name('bookings.show');
     Route::patch('/reservasi/{booking}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.updateStatus');
-    Route::get('/reservasi/{booking}/whatsapp', [AdminBookingController::class, 'generateWhatsapp'])->name('bookings.whatsapp');
 
     // Slot Jadwal
     Route::resource('slot', AdminSlotController::class);

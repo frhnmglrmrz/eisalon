@@ -71,21 +71,24 @@ class AdminBookingController extends Controller
             'status' => $validated['status']
         ]);
 
+        // Kirim notifikasi WA otomatis menggunakan Fonnte API
+        $this->sendFonnteNotification($booking);
+
         return redirect()->back()
-            ->with('success', 'Status reservasi #' . $booking->id . ' berhasil diubah menjadi ' . ucfirst($validated['status']) . '.');
+            ->with('success', 'Status reservasi #' . $booking->id . ' berhasil diubah menjadi ' . ucfirst($validated['status']) . ' dan notifikasi WhatsApp otomatis telah dikirim.');
     }
 
     /**
-     * Generate manual WhatsApp link for confirmation/cancellation notifications
+     * Send automatic WhatsApp notification using Fonnte API
      */
-    public function generateWhatsapp(Booking $booking)
+    protected function sendFonnteNotification(Booking $booking)
     {
         $booking->load(['user', 'service', 'stylist']);
         
         $customerName = $booking->user ? $booking->user->name : $booking->guest_name;
         $customerPhone = $booking->user ? $booking->user->phone : $booking->guest_phone;
         
-        // Clean customer phone number
+        // Bersihkan format nomor telepon pelanggan
         $customerPhone = preg_replace('/[^0-9]/', '', $customerPhone);
         if (str_starts_with($customerPhone, '0')) {
             $customerPhone = '62' . substr($customerPhone, 1);
@@ -120,11 +123,22 @@ class AdminBookingController extends Controller
                        "Kami akan segera mengirimkan konfirmasi. Terima kasih.";
         }
 
-        $whatsappUrl = "https://wa.me/{$customerPhone}?text=" . urlencode($message);
-        
-        // Update whatsapp_sent_at timestamp
-        $booking->update(['whatsapp_sent_at' => now()]);
+        try {
+            $token = config('services.fonnte.token', 'BzRjogWdCtZhCJzmAWCK');
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Authorization' => $token,
+            ])->post('https://api.fonnte.com/send', [
+                'target' => $customerPhone,
+                'message' => $message,
+            ]);
 
-        return redirect()->away($whatsappUrl);
+            if ($response->successful()) {
+                $booking->update(['whatsapp_sent_at' => now()]);
+            } else {
+                \Illuminate\Support\Facades\Log::error('Fonnte API failed to send WhatsApp notification: ' . $response->body());
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Exception during Fonnte API notification send: ' . $e->getMessage());
+        }
     }
 }

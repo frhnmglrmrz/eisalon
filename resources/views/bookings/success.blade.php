@@ -11,7 +11,7 @@
         </div>
 
         <h1 class="text-4xl font-bold gradient-text mb-4">Reservasi Berhasil Diajukan!</h1>
-        <p class="text-gray-600 mb-8">Pemesanan Anda telah tercatat dengan status <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-semibold">Pending</span>. Silakan hubungi admin via WhatsApp untuk konfirmasi dan info lebih lanjut.</p>
+        <p class="text-gray-600 mb-8">Pemesanan Anda telah tercatat dengan status <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-semibold">Pending</span>. Kami akan segera memproses reservasi Anda.</p>
 
         <!-- Informasi Akun Otomatis (Jika Ada) -->
         @if(session('new_user_created'))
@@ -73,14 +73,9 @@
         </div>
 
         <!-- Tombol Aksi -->
-        <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <a href="{{ $whatsappUrl }}" target="_blank" 
-               class="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-full font-semibold shadow-md transition flex items-center justify-center w-full sm:w-auto">
-                <i class="fab fa-whatsapp mr-2 text-xl"></i>Konfirmasi via WhatsApp
-            </a>
-            
+        <div class="flex justify-center items-center">
             <a href="{{ route('home') }}" 
-               class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-8 py-3 rounded-full font-semibold transition w-full sm:w-auto">
+               class="bg-indigo-900 text-white hover:bg-indigo-950 px-8 py-3 rounded-full font-semibold shadow-md transition w-full sm:w-auto">
                 Kembali ke Beranda
             </a>
         </div>

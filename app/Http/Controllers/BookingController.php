@@ -159,40 +159,11 @@ class BookingController extends Controller
     }
 
     /**
-     * Show success page and WhatsApp confirmation link
+     * Show success page
      */
     public function success(Booking $booking)
     {
         $booking->load(['service', 'stylist', 'slot']);
-        
-        // Cari admin untuk nomor telepon WhatsApp
-        $admin = User::where('role', 'admin')->first();
-        $adminPhone = $admin ? $admin->phone : '6289523808660';
-        
-        // Bersihkan format nomor telepon agar diawali kode negara
-        $adminPhone = preg_replace('/[^0-9]/', '', $adminPhone);
-        if (str_starts_with($adminPhone, '0')) {
-            $adminPhone = '62' . substr($adminPhone, 1);
-        }
-
-        // Generate teks WhatsApp
-        $customerName = $booking->user ? $booking->user->name : ($booking->guest_name ?? 'Pelanggan');
-        $dateFormatted = \Carbon\Carbon::parse($booking->booking_date)->format('d F Y');
-        $timeFormatted = \Carbon\Carbon::parse($booking->booking_time)->format('H:i');
-        $stylistName = $booking->stylist ? $booking->stylist->name : 'Pilih Acak (Siapa Saja)';
-
-        $message = "Halo Admin Alan's Art Hair Salon,\n\n" .
-                   "Saya ingin mengonfirmasi pemesanan reservasi saya:\n" .
-                   "- **ID Booking**: #{$booking->id}\n" .
-                   "- **Nama**: {$customerName}\n" .
-                   "- **Layanan**: {$booking->service->name}\n" .
-                   "- **Stylist**: {$stylistName}\n" .
-                   "- **Jadwal**: {$dateFormatted} jam {$timeFormatted}\n" .
-                   "- **Total**: Rp " . number_format($booking->service->price, 0, ',', '.') . "\n\n" .
-                   "Mohon untuk mengonfirmasi jadwal pemesanan saya. Terima kasih!";
-
-        $whatsappUrl = "https://wa.me/{$adminPhone}?text=" . urlencode($message);
-
-        return view('bookings.success', compact('booking', 'whatsappUrl'));
+        return view('bookings.success', compact('booking'));
     }
 }

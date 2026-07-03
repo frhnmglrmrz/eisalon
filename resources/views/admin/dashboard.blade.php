@@ -163,10 +163,6 @@
                                         <a href="{{ route('admin.bookings.show', $booking) }}" class="text-indigo-600 hover:text-indigo-800 transition" title="Lihat detail">
                                             <i class="fas fa-eye text-lg"></i>
                                         </a>
-                                        <a href="{{ route('admin.bookings.whatsapp', $booking) }}" target="_blank" 
-                                           class="text-emerald-600 hover:text-emerald-800 transition" title="Kirim notifikasi WhatsApp">
-                                            <i class="fab fa-whatsapp text-xl"></i>
-                                        </a>
                                     </div>
                                 </td>
                             </tr>
