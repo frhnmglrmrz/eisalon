@@ -39,7 +39,7 @@
                 <div class="relative bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-3xl p-8 shadow-sm border border-indigo-100">
                     <h3 class="text-3xl font-bold text-indigo-950 mb-4">Profil Salon Kami</h3>
                     <p class="text-gray-700 mb-4 leading-relaxed font-light">
-                        Di **Alan's Art Hair Salon**, kami percaya bahwa rambut adalah mahkota Anda. Setiap helai rambut yang kami sentuh adalah wujud dari seni potongan, detail pewarnaan, dan perawatan berkualitas tinggi.
+                        Di Alan's Art Hair Salon, kami percaya bahwa rambut adalah mahkota Anda. Setiap helai rambut yang kami sentuh adalah wujud dari seni potongan, detail pewarnaan, dan perawatan berkualitas tinggi.
                     </p>
                     <p class="text-gray-700 leading-relaxed font-light">
                         Dipimpin oleh stylist berpengalaman dan didukung produk premium, kami menjamin setiap kunjungan Anda mendatangkan kepuasan maksimal dan rasa percaya diri baru.
@@ -233,7 +233,7 @@
                     </div>
                     <div>
                         <h4 class="text-lg font-bold text-indigo-950 mb-1">Jam Kerja</h4>
-                        <p class="text-sm text-gray-600 font-light">Senin - Minggu: 09:00 - 17:00</p>
+                        <p class="text-sm text-gray-600 font-light">Senin - Minggu: 09:00 - 20:00</p>
                         <p class="text-xs text-gray-500 mt-2">Reservasi online dapat dilakukan kapan saja. Slot janji temu tersedia dalam batas jam tersebut.</p>
                     </div>
                 </div>
