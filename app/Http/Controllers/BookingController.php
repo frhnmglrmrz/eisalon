@@ -30,23 +30,15 @@ class BookingController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validasi Input Dasar
-        $rules = [
+        // 1. Validasi Input
+        $validated = $request->validate([
             'service_id' => 'required|exists:services,id',
             'date' => 'required|date|after_or_equal:today',
             'slot_id' => 'required|exists:slots,id',
             'stylist_id' => 'nullable|exists:stylists,id',
             'notes' => 'nullable|string|max:500',
-        ];
-
-        // Jika tidak masuk log (guest), wajib isi data kontak
-        if (!Auth::check()) {
-            $rules['guest_name'] = 'required|string|max:255';
-            $rules['guest_phone'] = 'required|string|max:20';
-            $rules['guest_email'] = 'required|email|max:255';
-        }
-
-        $validated = $request->validate($rules);
+            'payment_proof' => 'required|image|max:2048', // Bukti transfer gambar, maks 2MB
+        ]);
 
         // 2. Dapatkan Objek Terkait
         $service = Service::findOrFail($validated['service_id']);
@@ -109,35 +101,21 @@ class BookingController extends Controller
             $assignedStylistId = $availableStylist->id;
         }
 
-        // 4. Hubungkan ke User atau Buat User Baru untuk Guest
-        $user = null;
-        $tempPassword = null;
-
-        if (Auth::check()) {
-            $user = Auth::user();
-        } else {
-            $email = $validated['guest_email'];
-            $user = User::where('email', $email)->first();
-            
-            if (!$user) {
-                // Buat user baru otomatis
-                $tempPassword = Str::random(8);
-                $user = User::create([
-                    'name' => $validated['guest_name'],
-                    'email' => $email,
-                    'phone' => $validated['guest_phone'],
-                    'password' => Hash::make($tempPassword),
-                    'role' => 'customer',
-                ]);
-            }
+        // 4. Proses Upload Bukti Pembayaran
+        $paymentProofPath = null;
+        if ($request->hasFile('payment_proof')) {
+            $paymentProofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
         }
 
-        // 5. Simpan Booking
+        // 5. Hubungkan ke User Terautentikasi
+        $user = Auth::user();
+
+        // 6. Simpan Booking
         $booking = Booking::create([
             'user_id' => $user->id,
-            'guest_name' => Auth::check() ? null : $validated['guest_name'],
-            'guest_phone' => Auth::check() ? null : $validated['guest_phone'],
-            'guest_email' => Auth::check() ? null : $validated['guest_email'],
+            'guest_name' => null,
+            'guest_phone' => null,
+            'guest_email' => null,
             'service_id' => $service->id,
             'stylist_id' => $assignedStylistId,
             'slot_id' => $slot->id,
@@ -145,17 +123,11 @@ class BookingController extends Controller
             'booking_time' => $slot->start_time,
             'status' => 'pending',
             'notes' => $validated['notes'] ?? null,
+            'payment_proof' => $paymentProofPath,
         ]);
 
-        if ($tempPassword) {
-            session()->flash('new_user_created', [
-                'email' => $user->email,
-                'password' => $tempPassword
-            ]);
-        }
-
         return redirect()->route('booking.success', $booking)
-            ->with('success', 'Reservasi berhasil dibuat! Silakan lakukan konfirmasi via WhatsApp.');
+            ->with('success', 'Reservasi berhasil dibuat! Bukti pembayaran Anda sedang diverifikasi oleh admin.');
     }
 
     /**

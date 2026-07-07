@@ -28,7 +28,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Form Reservasi -->
             <div class="lg:col-span-2 space-y-8">
-                <form action="{{ route('booking.store') }}" method="POST" id="booking-form" class="glass-effect rounded-2xl p-8 shadow-xl space-y-6">
+                <form action="{{ route('booking.store') }}" method="POST" id="booking-form" class="glass-effect rounded-2xl p-8 shadow-xl space-y-6" enctype="multipart/form-data">
                     @csrf
                     
                     <!-- Pilihan Layanan -->
@@ -52,36 +52,7 @@
                         </select>
                     </div>
 
-                    <!-- Informasi Tamu (hanya untuk Guest) -->
-                    @guest
-                        <div class="border-t border-gray-100 pt-6 space-y-4" id="guest-info-section">
-                            <h3 class="font-bold text-gray-800 text-lg mb-2">
-                                <i class="fas fa-address-card text-indigo-600 mr-2"></i>Data Kontak Pemesan
-                            </h3>
-                            <p class="text-xs text-gray-500">Pemesanan tanpa login akan dibuatkan akun otomatis untuk memantau status pemesanan.</p>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="guest_name" class="block text-gray-700 font-semibold mb-1 text-sm">Nama Lengkap <span class="text-red-500">*</span></label>
-                                    <input type="text" id="guest_name" name="guest_name" value="{{ old('guest_name') }}" required
-                                           class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:outline-none transition text-sm"
-                                           placeholder="Masukkan nama lengkap">
-                                </div>
-                                <div>
-                                    <label for="guest_phone" class="block text-gray-700 font-semibold mb-1 text-sm">No. WhatsApp <span class="text-red-500">*</span></label>
-                                    <input type="text" id="guest_phone" name="guest_phone" value="{{ old('guest_phone') }}" required
-                                           class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:outline-none transition text-sm"
-                                           placeholder="Contoh: 08123456789">
-                                </div>
-                            </div>
-                            <div>
-                                <label for="guest_email" class="block text-gray-700 font-semibold mb-1 text-sm">Alamat Email <span class="text-red-500">*</span></label>
-                                <input type="email" id="guest_email" name="guest_email" value="{{ old('guest_email') }}" required
-                                       class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:outline-none transition text-sm"
-                                       placeholder="nama@email.com">
-                            </div>
-                        </div>
-                    @endguest
+
 
                     <!-- Pilih Stylist -->
                     @php
@@ -157,6 +128,29 @@
                         <textarea id="notes" name="notes" rows="3" 
                                   class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:outline-none transition resize-none"
                                   placeholder="Contoh: Permintaan potongan khusus, preferensi tertentu, dll...">{{ old('notes') }}</textarea>
+                    </div>
+
+                    <!-- Bukti Pembayaran -->
+                    <div class="border-t border-gray-100 pt-6">
+                        <label for="payment_proof" class="block text-gray-700 font-bold mb-2">
+                            <i class="fas fa-receipt text-indigo-600 mr-2"></i>Upload Bukti Pembayaran <span class="text-red-500">*</span>
+                        </label>
+                        <div class="mt-1 flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-indigo-500 transition">
+                            <div class="space-y-1 text-center">
+                                <i class="fas fa-file-image text-gray-400 text-3xl mb-3"></i>
+                                <div class="flex text-sm text-gray-600 justify-center">
+                                    <label for="payment_proof" class="relative cursor-pointer bg-white rounded-md font-semibold text-indigo-600 hover:text-indigo-500 focus-within:outline-none">
+                                        <span>Unggah gambar bukti transfer</span>
+                                        <input id="payment_proof" name="payment_proof" type="file" class="sr-only" accept="image/*" required>
+                                    </label>
+                                </div>
+                                <p class="text-xs text-gray-500">PNG, JPG, JPEG up to 2MB</p>
+                            </div>
+                        </div>
+                        <div id="payment-proof-preview-container" class="mt-4 hidden text-center">
+                            <span class="text-xs text-gray-500 block mb-2">Pratinjau Gambar:</span>
+                            <img id="payment-proof-preview" src="#" alt="Pratinjau Bukti Pembayaran" class="mx-auto max-h-48 rounded-lg shadow-sm border border-gray-200">
+                        </div>
                     </div>
 
                     <!-- Submit Button -->
@@ -408,31 +402,36 @@
             const hasService = serviceSelect.value !== '';
             const hasDate = dateInput.value !== '';
             const hasSlot = selectedSlotInput.value !== '';
-            
-            // Periksa input guest jika tidak login
-            let hasGuestInfo = true;
-            const guestName = document.getElementById('guest_name');
-            const guestPhone = document.getElementById('guest_phone');
-            const guestEmail = document.getElementById('guest_email');
+            const paymentProofInput = document.getElementById('payment_proof');
+            const hasPaymentProof = paymentProofInput && paymentProofInput.files && paymentProofInput.files.length > 0;
 
-            if (guestName || guestPhone || guestEmail) {
-                hasGuestInfo = (guestName.value.trim() !== '') && 
-                               (guestPhone.value.trim() !== '') && 
-                               (guestEmail.value.trim() !== '');
-            }
-
-            if (hasService && hasDate && hasSlot && hasGuestInfo) {
+            if (hasService && hasDate && hasSlot && hasPaymentProof) {
                 btnSubmit.disabled = false;
             } else {
                 btnSubmit.disabled = true;
             }
         }
 
-        // Live validasi form guest
-        const guestInputs = document.querySelectorAll('#guest-info-section input');
-        guestInputs.forEach(input => {
-            input.addEventListener('input', checkFormValidity);
-        });
+        // Live preview & validation untuk upload bukti pembayaran
+        const paymentProofInput = document.getElementById('payment_proof');
+        if (paymentProofInput) {
+            paymentProofInput.addEventListener('change', function() {
+                const previewContainer = document.getElementById('payment-proof-preview-container');
+                const previewImg = document.getElementById('payment-proof-preview');
+                
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        previewContainer.classList.remove('hidden');
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                } else {
+                    previewContainer.classList.add('hidden');
+                }
+                checkFormValidity();
+            });
+        }
 
         // Trigger pre-select service if passed
         if (serviceSelect.value) {

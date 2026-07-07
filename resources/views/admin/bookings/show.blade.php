@@ -115,6 +115,26 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Bukti Pembayaran -->
+            <div class="glass-effect rounded-2xl p-8 shadow-lg mt-6">
+                <h3 class="text-2xl font-bold text-gray-800 border-b border-gray-100 pb-3 mb-4">
+                    <i class="fas fa-receipt text-indigo-600 mr-2"></i>Bukti Pembayaran
+                </h3>
+                @if($booking->payment_proof)
+                    <div class="text-center">
+                        <a href="{{ asset('storage/' . $booking->payment_proof) }}" target="_blank" class="inline-block hover:opacity-90 transition">
+                            <img src="{{ asset('storage/' . $booking->payment_proof) }}" alt="Bukti Pembayaran" class="max-w-full max-h-96 rounded-xl shadow-md border border-gray-200 mx-auto">
+                        </a>
+                        <p class="text-xs text-gray-500 mt-2">Klik gambar untuk melihat ukuran penuh</p>
+                    </div>
+                @else
+                    <div class="text-center py-6 text-gray-500">
+                        <i class="fas fa-receipt text-3xl mb-2 text-gray-300"></i>
+                        <p class="text-sm">Tidak ada bukti pembayaran yang diunggah.</p>
+                    </div>
+                @endif
+            </div>
         </div>
 
         <!-- Kolom Kontrol Status -->

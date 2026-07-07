@@ -43,7 +43,7 @@ class AuthController extends Controller
                     ->with('success', 'Selamat datang kembali, Admin ' . $user->name . '!');
             }
 
-            return redirect()->intended(route('home'))
+            return redirect()->intended(route('customer.bookings.index'))
                 ->with('success', 'Selamat datang kembali, ' . $user->name . '!');
         }
 

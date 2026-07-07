@@ -22,10 +22,12 @@ Route::get('/layanan', [CatalogController::class, 'index'])->name('catalog.index
 Route::get('/layanan/{service}', [CatalogController::class, 'show'])->name('catalog.show');
 Route::get('/galeri', [GalleryController::class, 'index'])->name('gallery.index');
 
-// ── Booking Tamu (tanpa login) ─────────────────────────────
-Route::get('/reservasi', [BookingController::class, 'create'])->name('booking.create');
-Route::post('/reservasi', [BookingController::class, 'store'])->name('booking.store');
-Route::get('/reservasi/sukses/{booking}', [BookingController::class, 'success'])->name('booking.success');
+// ── Booking Member (perlu login) ───────────────────────────
+Route::middleware('auth')->group(function () {
+    Route::get('/reservasi', [BookingController::class, 'create'])->name('booking.create');
+    Route::post('/reservasi', [BookingController::class, 'store'])->name('booking.store');
+    Route::get('/reservasi/sukses/{booking}', [BookingController::class, 'success'])->name('booking.success');
+});
 
 // ── Cek Slot Availability (AJAX/JSON) ─────────────────────
 Route::get('/api/slots', [SlotController::class, 'available'])->name('slots.available');

@@ -146,9 +146,9 @@
                         <!-- CUSTOMER MENU -->
                         <div class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Pelanggan</div>
 
-                        <a href="{{ route('home') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-900 rounded-xl transition-all group {{ request()->routeIs('home') ? 'bg-indigo-50 text-indigo-900 shadow-sm' : '' }}">
-                            <i class="fas fa-home w-5 h-5 mr-3 {{ request()->routeIs('home') ? 'text-indigo-900' : 'text-gray-400 group-hover:text-indigo-800' }}"></i>
-                            <span class="font-medium">Beranda</span>
+                        <a href="{{ route('customer.bookings.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-900 rounded-xl transition-all group {{ request()->routeIs('customer.bookings.index') ? 'bg-indigo-50 text-indigo-900 shadow-sm' : '' }}">
+                            <i class="fas fa-tachometer-alt w-5 h-5 mr-3 {{ request()->routeIs('customer.bookings.index') ? 'text-indigo-900' : 'text-gray-400 group-hover:text-indigo-800' }}"></i>
+                            <span class="font-medium">Dashboard</span>
                         </a>
 
                         <a href="{{ route('catalog.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-900 rounded-xl transition-all group {{ request()->routeIs('catalog.index') ? 'bg-indigo-50 text-indigo-900 shadow-sm' : '' }}">
@@ -164,11 +164,6 @@
                         <a href="{{ route('booking.create') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-900 rounded-xl transition-all group {{ request()->routeIs('booking.create') ? 'bg-indigo-50 text-indigo-900 shadow-sm' : '' }}">
                             <i class="fas fa-calendar-plus w-5 h-5 mr-3 {{ request()->routeIs('booking.create') ? 'text-indigo-900' : 'text-gray-400 group-hover:text-indigo-800' }}"></i>
                             <span class="font-medium">Buat Reservasi</span>
-                        </a>
-
-                        <a href="{{ route('customer.bookings.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-900 rounded-xl transition-all group {{ request()->routeIs('customer.bookings.index') ? 'bg-indigo-50 text-indigo-900 shadow-sm' : '' }}">
-                            <i class="fas fa-calendar-alt w-5 h-5 mr-3 {{ request()->routeIs('customer.bookings.index') ? 'text-indigo-900' : 'text-gray-400 group-hover:text-indigo-800' }}"></i>
-                            <span class="font-medium">Reservasi Saya</span>
                         </a>
                     @endif
                     

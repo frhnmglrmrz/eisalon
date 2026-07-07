@@ -24,6 +24,7 @@ class Booking extends Model
         'status',
         'notes',
         'whatsapp_sent_at',
+        'payment_proof',
     ];
 
     protected $casts = [
