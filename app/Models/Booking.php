@@ -17,7 +17,6 @@ class Booking extends Model
         'guest_phone',
         'guest_email',
         'service_id',
-        'stylist_id',
         'slot_id',
         'booking_date',
         'booking_time',
@@ -49,13 +48,6 @@ class Booking extends Model
         return $this->belongsTo(Service::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function stylist(): BelongsTo
-    {
-        return $this->belongsTo(Stylist::class);
-    }
 
     /**
      * @return BelongsTo

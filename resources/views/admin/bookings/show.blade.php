@@ -34,14 +34,6 @@
                     </div>
 
                     <div>
-                        <span class="text-gray-400 block uppercase font-semibold text-xs tracking-wider">Stylist</span>
-                        <span class="font-bold text-gray-800 text-base mt-1 block">{{ $booking->stylist ? $booking->stylist->name : 'Pilih Siapa Saja (Acak)' }}</span>
-                        @if($booking->stylist)
-                            <span class="text-xs text-gray-500 mt-1 block">Spesialisasi: {{ $booking->stylist->specialization }}</span>
-                        @endif
-                    </div>
-
-                    <div>
                         <span class="text-gray-400 block uppercase font-semibold text-xs tracking-wider">Jadwal Pertemuan</span>
                         <span class="font-bold text-gray-800 mt-1 block">
                             {{ \Carbon\Carbon::parse($booking->booking_date)->format('d F Y') }} <br>

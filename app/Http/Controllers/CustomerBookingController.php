@@ -17,7 +17,7 @@ class CustomerBookingController extends Controller
         $user = Auth::user();
         
         $bookings = Booking::where('user_id', $user->id)
-            ->with(['service', 'stylist', 'slot'])
+            ->with(['service', 'slot'])
             ->orderBy('booking_date', 'desc')
             ->orderBy('booking_time', 'desc')
             ->paginate(10);

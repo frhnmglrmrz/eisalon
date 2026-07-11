@@ -70,10 +70,7 @@
                                             <i class="far fa-clock w-5 text-indigo-600"></i>
                                             <span>{{ \Carbon\Carbon::parse($booking->booking_time)->format('H:i') }} WIB</span>
                                         </div>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-user-friends w-5 text-indigo-600"></i>
-                                            <span>Stylist: {{ $booking->stylist ? $booking->stylist->name : 'Pilih Siapa Saja' }}</span>
-                                        </div>
+
                                         <div class="flex items-center">
                                             <i class="far fa-hourglass w-5 text-indigo-600"></i>
                                             <span>Durasi: {{ $booking->service->duration_minutes }} Menit</span>
@@ -112,14 +109,13 @@
                                         $customerName = Auth::user()->name;
                                         $dateFormatted = \Carbon\Carbon::parse($booking->booking_date)->format('d F Y');
                                         $timeFormatted = \Carbon\Carbon::parse($booking->booking_time)->format('H:i');
-                                        $stylistName = $booking->stylist ? $booking->stylist->name : 'Pilih Siapa Saja';
+
 
                                         $message = "Halo Admin Alan's Art Hair Salon,\n\n" .
                                                    "Saya ingin mengonfirmasi pemesanan reservasi saya:\n" .
                                                    "- **ID Booking**: #{$booking->id}\n" .
                                                    "- **Nama**: {$customerName}\n" .
                                                    "- **Layanan**: {$booking->service->name}\n" .
-                                                   "- **Stylist**: {$stylistName}\n" .
                                                    "- **Jadwal**: {$dateFormatted} jam {$timeFormatted}\n" .
                                                    "- **Total**: Rp " . number_format($booking->service->price, 0, ',', '.') . "\n\n" .
                                                    "Mohon untuk mengonfirmasi jadwal pemesanan saya. Terima kasih!";

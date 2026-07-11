@@ -77,7 +77,7 @@
                     </div>
                     <div>
                         <h4 class="text-lg font-bold text-indigo-950 mb-1">Reservasi Online Praktis</h4>
-                        <p class="text-sm text-gray-600 font-light">Pilih layanan, stylist favorit, tanggal, dan jam kosong secara instan tanpa perlu antre di tempat.</p>
+                        <p class="text-sm text-gray-600 font-light">Pilih layanan, tanggal, dan jam kosong secara instan tanpa perlu antre di tempat.</p>
                     </div>
                 </div>
 
@@ -86,8 +86,8 @@
                         <i class="fab fa-whatsapp"></i>
                     </div>
                     <div>
-                        <h4 class="text-lg font-bold text-indigo-950 mb-1">Konfirmasi WhatsApp Cepat</h4>
-                        <p class="text-sm text-gray-600 font-light">Selesai booking, format rincian pemesanan disiapkan otomatis untuk dikirim ke WhatsApp Admin sebagai validasi cepat.</p>
+                        <h4 class="text-lg font-bold text-indigo-950 mb-1">Konfirmasi WhatsApp Otomatis</h4>
+                        <p class="text-sm text-gray-600 font-light">Dapatkan notifikasi status pemesanan Anda secara otomatis via WhatsApp langsung ke nomor Anda setelah dikonfirmasi oleh Admin.</p>
                     </div>
                 </div>
             </div>

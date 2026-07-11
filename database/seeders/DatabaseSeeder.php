@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Service;
-use App\Models\Stylist;
 use App\Models\Slot;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -82,33 +81,7 @@ class DatabaseSeeder extends Seeder
             Service::create($service);
         }
 
-        // 3. Buat 3 Stylists
-        $stylists = [
-            [
-                'name' => 'Andi',
-                'specialization' => 'Potong Pria & Styling',
-                'bio' => 'Spesialis potongan rambut pria undercut/fade dan penataan rambut modern.',
-                'is_available' => true,
-            ],
-            [
-                'name' => 'Budi',
-                'specialization' => 'Pewarnaan & Treatment',
-                'bio' => 'Ahli dalam teknik bleaching, balayage, pewarnaan rambut, dan perawatan creambath.',
-                'is_available' => true,
-            ],
-            [
-                'name' => 'Cici',
-                'specialization' => 'Potong Wanita & Styling',
-                'bio' => 'Pakar potongan rambut wanita bob/layer dan blow rambut bervolume.',
-                'is_available' => true,
-            ],
-        ];
-
-        foreach ($stylists as $stylist) {
-            Stylist::create($stylist);
-        }
-
-        // 4. Buat Slot Jadwal untuk 7 Hari ke Depan
+        // 3. Buat Slot Jadwal untuk 7 Hari ke Depan
         $hours = [
             ['09:00:00', '10:00:00'],
             ['10:00:00', '11:00:00'],

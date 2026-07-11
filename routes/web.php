@@ -6,12 +6,10 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\SlotController;
-use App\Http\Controllers\StylistController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerBookingController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminServiceController;
-use App\Http\Controllers\Admin\AdminStylistController;
 use App\Http\Controllers\Admin\AdminBookingController;
 use App\Http\Controllers\Admin\AdminSlotController;
 use App\Http\Controllers\Admin\AdminGalleryController;
@@ -53,8 +51,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Layanan
     Route::resource('layanan', AdminServiceController::class);
 
-    // Stylist
-    Route::resource('stylist', AdminStylistController::class);
 
     // Booking
     Route::get('/reservasi', [AdminBookingController::class, 'index'])->name('bookings.index');

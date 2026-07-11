@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Service;
-use App\Models\Stylist;
 use App\Models\Slot;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -35,7 +34,6 @@ class BookingController extends Controller
             'service_id' => 'required|exists:services,id',
             'date' => 'required|date|after_or_equal:today',
             'slot_id' => 'required|exists:slots,id',
-            'stylist_id' => 'nullable|exists:stylists,id',
             'notes' => 'nullable|string|max:500',
             'payment_proof' => 'required|image|max:2048', // Bukti transfer gambar, maks 2MB
         ]);
@@ -49,56 +47,14 @@ class BookingController extends Controller
             return back()->withErrors(['date' => 'Tanggal slot tidak cocok dengan tanggal yang dipilih.'])->withInput();
         }
 
-        // 3. Tentukan & Validasi Stylist
-        $assignedStylistId = null;
+        // 3. Cek Ketersediaan Slot
+        $isBooked = Booking::where('slot_id', $slot->id)
+            ->where('booking_date', $validated['date'])
+            ->whereIn('status', ['pending', 'confirmed', 'completed'])
+            ->exists();
 
-        if ($request->filled('stylist_id')) {
-            $stylistId = $request->stylist_id;
-            $stylist = Stylist::available()
-                ->where(function($q) use ($service) {
-                    $q->where('specialization', 'like', '%' . $service->category . '%')
-                      ->orWhereNull('specialization')
-                      ->orWhere('specialization', '');
-                })
-                ->where('id', $stylistId)
-                ->first();
-
-            if (!$stylist) {
-                return back()->withErrors(['stylist_id' => 'Stylist tersebut tidak tersedia untuk kategori layanan ini.'])->withInput();
-            }
-
-            // Cek ketersediaan slot untuk stylist ini
-            $isBooked = Booking::where('slot_id', $slot->id)
-                ->where('booking_date', $validated['date'])
-                ->where('stylist_id', $stylistId)
-                ->whereIn('status', ['pending', 'confirmed', 'completed'])
-                ->exists();
-
-            if ($isBooked) {
-                return back()->withErrors(['slot_id' => 'Stylist yang dipilih sudah memiliki jadwal lain di jam ini.'])->withInput();
-            }
-
-            $assignedStylistId = $stylistId;
-        } else {
-            // Cari stylist yang cocok dan tersedia
-            $availableStylist = Stylist::available()
-                ->where(function($q) use ($service) {
-                    $q->where('specialization', 'like', '%' . $service->category . '%')
-                      ->orWhereNull('specialization')
-                      ->orWhere('specialization', '');
-                })
-                ->whereDoesntHave('bookings', function($q) use ($slot, $validated) {
-                    $q->where('slot_id', $slot->id)
-                      ->where('booking_date', $validated['date'])
-                      ->whereIn('status', ['pending', 'confirmed', 'completed']);
-                })
-                ->first();
-
-            if (!$availableStylist) {
-                return back()->withErrors(['slot_id' => 'Semua stylist untuk kategori layanan ini sudah penuh pada slot jam terpilih.'])->withInput();
-            }
-
-            $assignedStylistId = $availableStylist->id;
+        if ($isBooked) {
+            return back()->withErrors(['slot_id' => 'Slot waktu terpilih sudah terisi. Silakan pilih slot lainnya.'])->withInput();
         }
 
         // 4. Proses Upload Bukti Pembayaran
@@ -117,7 +73,6 @@ class BookingController extends Controller
             'guest_phone' => null,
             'guest_email' => null,
             'service_id' => $service->id,
-            'stylist_id' => $assignedStylistId,
             'slot_id' => $slot->id,
             'booking_date' => $validated['date'],
             'booking_time' => $slot->start_time,
@@ -135,7 +90,7 @@ class BookingController extends Controller
      */
     public function success(Booking $booking)
     {
-        $booking->load(['service', 'stylist', 'slot']);
+        $booking->load(['service', 'slot']);
         return view('bookings.success', compact('booking'));
     }
 }

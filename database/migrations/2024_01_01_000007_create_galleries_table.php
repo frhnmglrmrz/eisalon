@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('therapists', function (Blueprint $table) {
+        Schema::create('galleries', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('specialization'); // facial, massage, hair, dll
-            $table->text('bio')->nullable();
-            $table->string('photo')->nullable();
-            $table->boolean('is_available')->default(true);
+            $table->foreignId('service_id')->nullable()->constrained('services')->onDelete('set null');
+            $table->string('caption')->nullable();
+            $table->string('photo');
+            $table->integer('sort_order')->default(0);
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('therapists');
+        Schema::dropIfExists('galleries');
     }
 };

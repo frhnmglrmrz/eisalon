@@ -57,10 +57,7 @@
                         pukul {{ \Carbon\Carbon::parse($booking->booking_time)->format('H:i') }} WIB
                     </span>
                 </div>
-                <div>
-                    <span class="text-gray-500 block">Stylist:</span>
-                    <span class="font-bold text-gray-800">{{ $booking->stylist ? $booking->stylist->name : 'Pilih Siapa Saja' }}</span>
-                </div>
+
                 <div>
                     <span class="text-gray-500 block">Catatan Anda:</span>
                     <span class="font-medium text-gray-700 italic">{{ $booking->notes ?? '-' }}</span>

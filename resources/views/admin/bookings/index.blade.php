@@ -65,7 +65,7 @@
                         <tr class="border-b-2 border-gray-200 text-gray-600">
                             <th class="text-left py-4 px-4 font-semibold text-sm">ID</th>
                             <th class="text-left py-4 px-4 font-semibold text-sm">Pelanggan</th>
-                            <th class="text-left py-4 px-4 font-semibold text-sm">Layanan / Stylist</th>
+                            <th class="text-left py-4 px-4 font-semibold text-sm">Layanan</th>
                             <th class="text-left py-4 px-4 font-semibold text-sm">Jadwal Pertemuan</th>
                             <th class="text-left py-4 px-4 font-semibold text-sm">Status</th>
                             <th class="text-left py-4 px-4 font-semibold text-sm">Biaya</th>
@@ -90,7 +90,6 @@
                                 </td>
                                 <td class="py-4 px-4">
                                     <div class="font-semibold text-gray-800">{{ $booking->service->name }}</div>
-                                    <div class="text-xs text-gray-500">Stylist: {{ $booking->stylist ? $booking->stylist->name : 'Acak' }}</div>
                                 </td>
                                 <td class="py-4 px-4 text-sm">
                                     <div class="font-semibold text-gray-800">{{ \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') }}</div>

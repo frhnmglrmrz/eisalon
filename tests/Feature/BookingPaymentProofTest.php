@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Booking;
 use App\Models\Service;
 use App\Models\Slot;
-use App\Models\Stylist;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -47,11 +46,6 @@ class BookingPaymentProofTest extends TestCase
             'duration_minutes' => 30,
             'is_active' => true,
         ]);
-        $stylist = Stylist::create([
-            'name' => 'John Doe',
-            'specialization' => 'Potong',
-            'is_available' => true,
-        ]);
         $slot = Slot::create([
             'date' => now()->format('Y-m-d'),
             'start_time' => '09:00:00',
@@ -70,7 +64,6 @@ class BookingPaymentProofTest extends TestCase
             'service_id' => $service->id,
             'date' => now()->format('Y-m-d'),
             'slot_id' => $slot->id,
-            'stylist_id' => $stylist->id,
             'notes' => 'Some test notes',
             'payment_proof' => $file,
         ]);

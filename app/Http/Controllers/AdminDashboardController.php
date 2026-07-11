@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Booking;
 use App\Models\Service;
-use App\Models\Stylist;
 use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
@@ -25,14 +24,13 @@ class AdminDashboardController extends Controller
             'total_users' => User::where('role', 'customer')->count(),
             'total_bookings' => Booking::count(),
             'total_services' => Service::count(),
-            'total_stylists' => Stylist::count(),
             'total_revenue' => $totalRevenue,
             'pending_bookings' => Booking::where('status', 'pending')->count(),
             'confirmed_bookings' => Booking::where('status', 'confirmed')->count(),
             'completed_bookings' => Booking::where('status', 'completed')->count(),
         ];
 
-        $recent_bookings = Booking::with(['user', 'service', 'stylist', 'slot'])
+        $recent_bookings = Booking::with(['user', 'service', 'slot'])
             ->latest()
             ->take(8)
             ->get();

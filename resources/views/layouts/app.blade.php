@@ -122,11 +122,6 @@
                             <span class="font-medium">Layanan</span>
                         </a>
 
-                        <a href="{{ route('admin.stylist.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-900 rounded-xl transition-all group {{ request()->routeIs('admin.stylist.*') ? 'bg-indigo-50 text-indigo-900 shadow-sm' : '' }}">
-                            <i class="fas fa-user-friends w-5 h-5 mr-3 {{ request()->routeIs('admin.stylist.*') ? 'text-indigo-900' : 'text-gray-400 group-hover:text-indigo-800' }}"></i>
-                            <span class="font-medium">Stylist</span>
-                        </a>
-
                         <a href="{{ route('admin.slot.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-900 rounded-xl transition-all group {{ request()->routeIs('admin.slot.*') ? 'bg-indigo-50 text-indigo-900 shadow-sm' : '' }}">
                             <i class="fas fa-calendar-alt w-5 h-5 mr-3 {{ request()->routeIs('admin.slot.*') ? 'text-indigo-900' : 'text-gray-400 group-hover:text-indigo-800' }}"></i>
                             <span class="font-medium">Slot Jadwal</span>

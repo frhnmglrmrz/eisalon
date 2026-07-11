@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->decimal('price', 10, 2);
-            $table->integer('duration'); // durasi dalam menit
+            $table->integer('duration_minutes'); // durasi dalam menit
             $table->string('category'); // facial, massage, hair_treatment, dll
-            $table->string('image')->nullable();
+            $table->string('photo')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

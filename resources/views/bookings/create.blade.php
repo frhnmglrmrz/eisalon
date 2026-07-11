@@ -54,47 +54,6 @@
 
 
 
-                    <!-- Pilih Stylist -->
-                    @php
-                        $stylists = \App\Models\Stylist::available()->get();
-                    @endphp
-                    <div class="border-t border-gray-100 pt-6" id="stylist-section" style="display: none;">
-                        <label class="block text-gray-700 font-bold mb-3">
-                            <i class="fas fa-user-friends text-indigo-600 mr-2"></i>Pilih Stylist (Opsional)
-                        </label>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="stylists-grid">
-                            <!-- Opsi Pilih Acak -->
-                            <label class="cursor-pointer">
-                                <input type="radio" name="stylist_id" value="" class="peer hidden" checked>
-                                <div class="glass-effect rounded-xl p-4 border-2 border-transparent peer-checked:border-indigo-600 peer-checked:bg-indigo-50/50 hover:bg-gray-50/50 transition h-full flex flex-col justify-center">
-                                    <div class="font-bold text-gray-800">Pilih Siapa Saja (Acak)</div>
-                                    <div class="text-xs text-gray-500 mt-1">Kami akan memilihkan stylist terbaik yang tersedia untuk Anda.</div>
-                                </div>
-                            </label>
-
-                            <!-- Stylist terdaftar -->
-                            @foreach($stylists as $stylist)
-                                <label class="cursor-pointer stylist-card" data-specialization="{{ $stylist->specialization }}">
-                                    <input type="radio" name="stylist_id" value="{{ $stylist->id }}" class="peer hidden" {{ old('stylist_id') == $stylist->id ? 'checked' : '' }}>
-                                    <div class="glass-effect rounded-xl p-4 border-2 border-transparent peer-checked:border-indigo-600 peer-checked:bg-indigo-50/50 hover:bg-gray-50/50 transition h-full">
-                                        <div class="flex items-center space-x-3">
-                                            @if($stylist->photo)
-                                                <img src="{{ asset('storage/' . $stylist->photo) }}" alt="{{ $stylist->name }}" class="w-12 h-12 rounded-full object-cover shadow-sm">
-                                            @else
-                                                <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                                                    {{ strtoupper(substr($stylist->name, 0, 1)) }}
-                                                </div>
-                                            @endif
-                                            <div>
-                                                <div class="font-bold text-gray-800">{{ $stylist->name }}</div>
-                                                <div class="text-xs text-gray-500 font-semibold">{{ $stylist->specialization }}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
 
                     <!-- Pilih Tanggal -->
                     <div class="border-t border-gray-100 pt-6" id="date-section" style="display: none;">
@@ -182,10 +141,6 @@
                             <span id="summary-category" class="font-semibold text-gray-800">-</span>
                         </div>
 
-                        <div class="flex flex-col border-t border-gray-100 pt-3">
-                            <span class="text-xs text-gray-500 uppercase font-semibold">Stylist Pilihan</span>
-                            <span id="summary-stylist" class="font-bold text-gray-800 text-sm">Pilih Siapa Saja (Acak)</span>
-                        </div>
 
                         <div class="flex flex-col border-t border-gray-100 pt-3">
                             <span class="text-xs text-gray-500 uppercase font-semibold">Jadwal Pertemuan</span>
@@ -209,7 +164,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         const serviceSelect = document.getElementById('service_id');
         const dateInput = document.getElementById('booking_date');
-        const stylistsGrid = document.getElementById('stylists-grid');
         const slotsGrid = document.getElementById('slots-grid');
         const slotsLoading = document.getElementById('slots-loading');
         const selectedSlotInput = document.getElementById('selected_slot_id');
@@ -219,7 +173,6 @@
         const summaryService = document.getElementById('summary-service');
         const summaryDuration = document.getElementById('summary-duration');
         const summaryCategory = document.getElementById('summary-category');
-        const summaryStylist = document.getElementById('summary-stylist');
         const summaryDateTime = document.getElementById('summary-date-time');
         const summaryPrice = document.getElementById('summary-price');
 
@@ -242,64 +195,14 @@
             summaryCategory.textContent = category;
             summaryPrice.textContent = 'Rp ' + price.toLocaleString('id-ID');
 
-            // Tampilkan Section Stylist & Date
-            document.getElementById('stylist-section').style.display = 'block';
+            // Tampilkan Section Date
             document.getElementById('date-section').style.display = 'block';
-
-            // Filter Stylist Berdasarkan Kategori Layanan
-            filterStylists(category);
 
             // Reset Slots
             resetSlots();
             checkFormValidity();
         });
 
-        // Fungsi Filter Stylist
-        function filterStylists(category) {
-            const stylistCards = document.querySelectorAll('.stylist-card');
-            let hasStylistForCategory = false;
-
-            stylistCards.forEach(card => {
-                const spec = card.getAttribute('data-specialization');
-                // Jika spesialisasi mengandung kategori atau kosong/umum
-                if (!spec || spec.toLowerCase().includes(category.toLowerCase())) {
-                    card.style.display = 'block';
-                    hasStylistForCategory = true;
-                } else {
-                    card.style.display = 'none';
-                    // Reset input radio jika disembunyikan
-                    const radio = card.querySelector('input[type="radio"]');
-                    if (radio.checked) {
-                        document.querySelector('input[name="stylist_id"][value=""]').checked = true;
-                        summaryStylist.textContent = 'Pilih Siapa Saja (Acak)';
-                    }
-                }
-            });
-
-            // Trigger slot check if date is already set
-            if (dateInput.value) {
-                fetchAvailableSlots();
-            }
-        }
-
-        // 2. Event: Ketika Stylist Dipilih
-        document.querySelectorAll('input[name="stylist_id"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                if (this.checked) {
-                    if (this.value === '') {
-                        summaryStylist.textContent = 'Pilih Siapa Saja (Acak)';
-                    } else {
-                        const card = this.closest('.stylist-card');
-                        const name = card.querySelector('.font-bold').textContent;
-                        summaryStylist.textContent = name;
-                    }
-                    
-                    if (dateInput.value) {
-                        fetchAvailableSlots();
-                    }
-                }
-            });
-        });
 
         // 3. Event: Ketika Tanggal Dipilih
         dateInput.addEventListener('change', function() {
@@ -314,8 +217,6 @@
         // 4. API: Ambil Slot yang Tersedia
         async function fetchAvailableSlots() {
             const serviceId = serviceSelect.value;
-            const stylistEl = document.querySelector('input[name="stylist_id"]:checked');
-            const stylistId = stylistEl ? stylistEl.value : '';
             const date = dateInput.value;
 
             if (!date || !serviceId) return;
@@ -326,7 +227,7 @@
             btnSubmit.disabled = true;
 
             try {
-                const url = `{{ route('slots.available', [], false) }}?date=${date}&service_id=${serviceId}&stylist_id=${stylistId}`;
+                const url = `{{ route('slots.available', [], false) }}?date=${date}&service_id=${serviceId}`;
                 const response = await fetch(url);
                 const data = await response.json();
 

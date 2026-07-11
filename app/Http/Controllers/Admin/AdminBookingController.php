@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\User;
 use App\Models\Service;
-use App\Models\Stylist;
 use Illuminate\Http\Request;
 
 class AdminBookingController extends Controller
@@ -16,7 +15,7 @@ class AdminBookingController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Booking::with(['user', 'service', 'stylist', 'slot']);
+        $query = Booking::with(['user', 'service', 'slot']);
 
         // Filter by status
         if ($request->filled('status')) {
@@ -54,7 +53,7 @@ class AdminBookingController extends Controller
      */
     public function show(Booking $booking)
     {
-        $booking->load(['user', 'service', 'stylist', 'slot']);
+        $booking->load(['user', 'service', 'slot']);
         return view('admin.bookings.show', compact('booking'));
     }
 
@@ -83,7 +82,7 @@ class AdminBookingController extends Controller
      */
     protected function sendFonnteNotification(Booking $booking)
     {
-        $booking->load(['user', 'service', 'stylist']);
+        $booking->load(['user', 'service']);
         
         $customerName = $booking->user ? $booking->user->name : $booking->guest_name;
         $customerPhone = $booking->user ? $booking->user->phone : $booking->guest_phone;
@@ -96,14 +95,11 @@ class AdminBookingController extends Controller
 
         $dateFormatted = \Carbon\Carbon::parse($booking->booking_date)->format('d F Y');
         $timeFormatted = \Carbon\Carbon::parse($booking->booking_time)->format('H:i');
-        $stylistName = $booking->stylist ? $booking->stylist->name : 'Pilih Acak (Siapa Saja)';
-        
         if ($booking->status === 'confirmed') {
             $message = "Halo {$customerName},\n\n" .
                        "Kami dari *Alan's Art Hair Salon* menginformasikan bahwa reservasi Anda telah **TERKONFIRMASI**:\n" .
                        "- **ID Booking**: #{$booking->id}\n" .
                        "- **Layanan**: {$booking->service->name}\n" .
-                       "- **Stylist**: {$stylistName}\n" .
                        "- **Jadwal**: {$dateFormatted} jam {$timeFormatted} WIB\n\n" .
                        "Sampai jumpa di salon! 😊";
         } elseif ($booking->status === 'cancelled') {
