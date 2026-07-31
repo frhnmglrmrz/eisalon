@@ -8,6 +8,7 @@ use App\Models\Slot;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -47,39 +48,46 @@ class BookingController extends Controller
             return back()->withErrors(['date' => 'Tanggal slot tidak cocok dengan tanggal yang dipilih.'])->withInput();
         }
 
-        // 3. Cek Ketersediaan Slot
-        $isBooked = Booking::where('slot_id', $slot->id)
-            ->where('booking_date', $validated['date'])
-            ->whereIn('status', ['pending', 'confirmed', 'completed'])
-            ->exists();
-
-        if ($isBooked) {
-            return back()->withErrors(['slot_id' => 'Slot waktu terpilih sudah terisi. Silakan pilih slot lainnya.'])->withInput();
-        }
-
-        // 4. Proses Upload Bukti Pembayaran
+        // 3. Proses Upload Bukti Pembayaran
         $paymentProofPath = null;
         if ($request->hasFile('payment_proof')) {
             $paymentProofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
         }
 
-        // 5. Hubungkan ke User Terautentikasi
+        // 4. Hubungkan ke User Terautentikasi
         $user = Auth::user();
 
-        // 6. Simpan Booking
-        $booking = Booking::create([
-            'user_id' => $user->id,
-            'guest_name' => null,
-            'guest_phone' => null,
-            'guest_email' => null,
-            'service_id' => $service->id,
-            'slot_id' => $slot->id,
-            'booking_date' => $validated['date'],
-            'booking_time' => $slot->start_time,
-            'status' => 'pending',
-            'notes' => $validated['notes'] ?? null,
-            'payment_proof' => $paymentProofPath,
-        ]);
+        // 5. Cek Ketersediaan Slot & Simpan Booking dalam satu transaksi terkunci,
+        // supaya dua request bersamaan tidak bisa lolos cek dan bentrok di slot yang sama.
+        $booking = DB::transaction(function () use ($validated, $service, $slot, $paymentProofPath, $user) {
+            $isBooked = Booking::where('slot_id', $slot->id)
+                ->where('booking_date', $validated['date'])
+                ->whereIn('status', ['pending', 'confirmed', 'completed'])
+                ->lockForUpdate()
+                ->exists();
+
+            if ($isBooked) {
+                return null;
+            }
+
+            return Booking::create([
+                'user_id' => $user->id,
+                'guest_name' => null,
+                'guest_phone' => null,
+                'guest_email' => null,
+                'service_id' => $service->id,
+                'slot_id' => $slot->id,
+                'booking_date' => $validated['date'],
+                'booking_time' => $slot->start_time,
+                'status' => 'pending',
+                'notes' => $validated['notes'] ?? null,
+                'payment_proof' => $paymentProofPath,
+            ]);
+        });
+
+        if (!$booking) {
+            return back()->withErrors(['slot_id' => 'Slot waktu terpilih sudah terisi. Silakan pilih slot lainnya.'])->withInput();
+        }
 
         return redirect()->route('booking.success', $booking)
             ->with('success', 'Reservasi berhasil dibuat! Bukti pembayaran Anda sedang diverifikasi oleh admin.');
